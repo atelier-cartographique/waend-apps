@@ -1,0 +1,37 @@
+{
+    "compilerOptions": {
+        "project": "src",
+        "outDir": "js",
+        "declaration": false,
+        "moduleResolution": "node",
+        "target": "ES6",
+        "alwaysStrict": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitUseStrict": false,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictNullChecks": true,
+        "removeComments": true,
+        "sourceMap": true,
+        "baseUrl": "../",
+        "paths": {
+            "waend-lib": [
+                "waend/lib"
+            ],
+            "waend-util": [
+                "waend/util"
+            ],
+            "waend-shell": [
+                "waend/shell"
+            ],
+            "waend-commands": [
+                "waend/commands"
+            ]
+        }
+    },
+    "files": [
+        "src/index.ts"
+    ]
+}
