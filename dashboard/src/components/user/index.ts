@@ -7,6 +7,7 @@ import { DIV } from "../elements";
 export interface UserDataTuple {
     key: string;
     value: any;
+    editing: boolean;
 }
 
 export type UserData = UserDataTuple[];

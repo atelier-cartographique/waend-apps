@@ -249,31 +249,7 @@ export class Bind extends EventEmitter {
     }
 
     update(model: Model, key: string, val: any) {
-        const keys = key.split('.');
-        const props = model.getData();
-        if (1 === keys.length) {
-            props[key] = val;
-        }
-        else {
-            const kl = keys.length;
-            let currentDict = props;
-            let k;
-            for (let i = 0; i < kl; i++) {
-                k = keys[i];
-                if ((i + 1) === kl) {
-                    currentDict[k] = val;
-                }
-                else {
-                    if (!(k in currentDict)) {
-                        currentDict[k] = {};
-                    }
-                    else { // if (!_.isObject(currentDict[k])) {
-                        currentDict[k] = {};
-                    }
-                    currentDict = currentDict[k];
-                }
-            }
-        }
+        model.updateProperty(key, val);
         semaphore.signal('model:set', { key, model });
         return this.db.update(model);
     }

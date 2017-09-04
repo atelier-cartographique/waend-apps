@@ -1,20 +1,29 @@
 import queries from '../../queries/user';
 import events from '../../events/user';
 import { DIV, H1, INPUT, BUTTON, SPAN } from '../elements';
+import { UserDataTuple } from "src/components/user";
 
 
 
 
-const addAttribute = (
-    DIV({ className: 'add-attribute' },
-        INPUT({ placeholder: 'key' }),
-        INPUT({ placeholder: 'value' }),
-        BUTTON({
-            onClick: (e) => {
-
-            }, className: 'add'
-        }, '+'),
-    ));
+const addAttribute =
+    (t: UserDataTuple) => (
+        DIV({ className: 'add-attribute' },
+            INPUT({
+                value: t.key,
+                placeholder: 'key',
+                onChange: e => events.updateNewKey(e.target.value),
+            }),
+            INPUT({
+                value: t.value,
+                placeholder: 'value',
+                onChange: e => events.updateNewValue(e.target.value),
+            }),
+            BUTTON({
+                className: 'add',
+                onClick: () => events.createAttribute(),
+            }, '+'),
+        ));
 
 const deleteUserKey =
     (_k: string) => () => {
@@ -23,23 +32,26 @@ const deleteUserKey =
 
 const render =
     () => {
-        const kv = queries.getAttributeKeys().map((k) => {
-            const v = queries.getAttributeValue(k);
+        const kv = queries.getAttributes().map((t) => {
             return DIV({},
-                SPAN({}, k),
+                SPAN({}, t.key),
                 INPUT({
-                    value: v,
+                    value: t.value,
                     onChange: (e) => {
-                        events.setUserValue(k, e.target.value);
+                        events.updateKV(t.key, e.target.value);
                     },
+                    onBlur: () => events.setUserValue(t.key)
                 }),
-                BUTTON({ onClick: deleteUserKey(k), className: 'remove' }, '-'));
+                BUTTON({
+                    className: 'remove',
+                    onClick: deleteUserKey(t.key),
+                }, '-'));
         });
         return (
             DIV({ className: 'user' },
                 H1({}, queries.getUserName()),
                 DIV({ className: 'attributes' }, ...kv),
-                addAttribute)
+                addAttribute(queries.getNewAttribute()))
         );
     };
 

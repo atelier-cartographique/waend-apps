@@ -1,11 +1,28 @@
 
 import * as debug from 'debug';
-import { dispatch, observe } from './index';
+import queries from '../queries/user';
+import { dispatch, observe, dispatchK } from './index';
 import { getBinder } from 'waend/shell';
+import { UserDataTuple } from "src/components/user";
 
 
 const logger = debug('waend:events/user');
 
+
+const cond =
+    <T>(t: (a: T) => T, f: (a: T) => T) =>
+        (c: boolean) =>
+            (a: T) => {
+                if (c) {
+                    return t(a);
+                }
+                return f(a);
+            };
+
+const mod =
+    <T>(o: T, k: string, v: any) => {
+        return Object.assign({}, o, { [k]: v });
+    }
 
 observe('data/user', (user) => {
     if (!user) {
@@ -13,16 +30,26 @@ observe('data/user', (user) => {
     }
     else {
         dispatch('component/user', () => {
-            const data = user.getData();
-            return Object.keys(data).map((k) => {
-                return {
-                    key: k,
-                    value: data[k],
-                }
-            });
+            const data = user.getProperties();
+            const newKey = {
+                key: '',
+                value: '',
+                editing: false,
+            };
+            return (
+                [newKey].concat(Object.keys(data).map((k) => {
+                    return {
+                        key: k,
+                        value: data[k],
+                        editing: false,
+                    }
+                })));
         });
     }
 });
+
+const dispatchComp = dispatchK('component/user');
+const dispatchData = dispatchK('data/user');
 
 const events = {
 
@@ -34,13 +61,58 @@ const events = {
             });
     },
 
-    setUserValue(key: string, val: string) {
-        dispatch('data/user', (u) => {
+    updateKV(k: string, v: string) {
+        const m = cond<UserDataTuple>(
+            (t) => mod(mod(t, 'value', v), 'editing', true),
+            t => t
+        );
+        dispatchComp((kv) => (
+            kv.slice(0, -1)
+                .map(t => mod(t, 'editing', false))
+                .map((t) => m(t.key === k)(t))));
+    },
+
+    setUserValue(key: string) {
+        let val: any;
+        dispatchComp((kv) => {
+            val = kv.filter((t) => t.key === key).reduce((_acc, t) => t.value, null);
+            return kv;
+        });
+        dispatchData((u) => {
             if (u) {
                 getBinder()
                     .update(u, key, val)
                     .then(() => {
-                        dispatch('data/user', u => u);
+                        dispatchData(u => u);
+                    });
+            }
+            return u;
+        });
+    },
+
+    updateNewKey(k: string) {
+        dispatchComp((kv) => (
+            kv.slice(0, -1).concat(
+                kv.slice(-1).map(t => mod(t, 'key', k))
+            )));
+    },
+
+    updateNewValue(v: string) {
+        dispatchComp((kv) => (
+            kv.slice(0, -1).concat(
+                kv.slice(-1).map(t => mod(t, 'value', v))
+            )));
+    },
+
+    createAttribute() {
+        const { key, value } = queries.getNewAttribute();
+        dispatchData((u) => {
+            logger(`createAttribute ${key}: ${value}`);
+            if (u) {
+                getBinder()
+                    .update(u, key, value)
+                    .then(() => {
+                        dispatchData(u => u);
                     });
             }
             return u;

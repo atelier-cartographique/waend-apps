@@ -16,7 +16,7 @@ const queries = {
         const title = query('app/title');
         const user = query('data/user');
         if (user) {
-            const userData = user.getData();
+            const userData = user.getProperties();
             return `${title} - ${userData.name}`;
         }
         return title;

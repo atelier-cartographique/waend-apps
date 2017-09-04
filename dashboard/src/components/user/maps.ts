@@ -16,7 +16,7 @@ const renderMapItem =
                 href: `/view/${group.id}`,
                 className: 'view-map',
             }, 'view'),
-            SPAN({}, group.getData().name)
+            SPAN({}, group.getProperties().name)
         ));
 
 

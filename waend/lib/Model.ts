@@ -81,13 +81,36 @@ export class Model {
         return pathKey(this.data.properties, key, def);
     }
 
-    getData(): ModelProperties {
+    getProperties(): ModelProperties {
         return JSON.parse(JSON.stringify(this.data.properties));
     }
 
-    setData(data: ModelProperties) {
-        this.data.properties = data;
-        // this.emit('set:data', data);
+    updateProperty(key: string, val: any) {
+        const keys = key.split('.');
+        const props = this.data.properties;
+        if (1 === keys.length) {
+            props[key] = val;
+        }
+        else {
+            const kl = keys.length;
+            let currentDict = props;
+            let k;
+            for (let i = 0; i < kl; i++) {
+                k = keys[i];
+                if ((i + 1) === kl) {
+                    currentDict[k] = val;
+                }
+                else {
+                    if (!(k in currentDict)) {
+                        currentDict[k] = {};
+                    }
+                    else { // if (!_.isObject(currentDict[k])) {
+                        currentDict[k] = {};
+                    }
+                    currentDict = currentDict[k];
+                }
+            }
+        }
     }
 
     toJSON() {

@@ -6,7 +6,7 @@ const getData =
     (): ModelProperties => {
         const user = query('data/user');
         if (user) {
-            return user.getData();
+            return user.getProperties();
         }
         return {};
     };
@@ -20,16 +20,16 @@ const queries = {
         return 'Missing Name';
     },
 
-    getAttributeKeys() {
-        return Object.keys(getData());
+    getAttributes() {
+        return query('component/user').slice(0, -1);
     },
 
-    getAttributeValue(key: string, def = '') {
-        const data = getData();
-        if (key in data) {
-            return data[key].toString();
-        }
-        return def;
+    getNewAttribute() {
+        return query('component/user').slice(-1)[0];
+    },
+
+    getAttributeKeys() {
+        return query('component/user').slice(0, -1).map(t => t.key);
     },
 
     getMaps(): Group[] {

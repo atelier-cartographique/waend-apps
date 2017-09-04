@@ -26,12 +26,24 @@ export const configure = (store: IStoreInteractions<IShape>) => {
     storeRef = store;
 };
 
-export const dispatch = <K extends keyof IShape>(key: K, handler: IReducer<IShape, IShape[K]>): void => {
-    if (!storeRef) {
-        throw (new Error('DispatchNotConfigured'));
-    }
-    storeRef.dispatch(key, handler);
-};
+export const dispatch =
+    <K extends keyof IShape>(key: K, handler?: IReducer<IShape, IShape[K]>) => {
+        if (!storeRef) {
+            throw (new Error('DispatchNotConfigured'));
+        }
+        if (!handler) {
+            return (handler: IReducer<IShape, IShape[K]>) => {
+                storeRef.dispatch(key, handler);
+            }
+        }
+        return storeRef.dispatch(key, handler);
+    };
+
+export const dispatchK =
+    <K extends keyof IShape>(key: K) =>
+        (handler: IReducer<IShape, IShape[K]>) => {
+            storeRef.dispatch(key, handler);
+        };
 
 export const observe = <K extends keyof IShape>(key: K, handler: (a: IShape[K]) => void): void => {
     if (!storeRef) {
