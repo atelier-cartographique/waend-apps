@@ -23,7 +23,7 @@ export const configure = (store: IStoreInteractions<IShape>) => {
 };
 
 
-export const query = <K extends keyof IShape>(key: K): IShape[K] => {
+export const query = <K extends keyof IShape>(key: K): Readonly<IShape>[K] => {
     if (!storeRef) {
         throw (new Error('GetPathNotConfigured'));
     }

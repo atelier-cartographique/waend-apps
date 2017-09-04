@@ -66,6 +66,7 @@ export interface ModelData extends BaseModelData {
 
 export class Model {
     readonly id: string;
+    name: string;
 
     constructor(protected data: ModelData) {
         // super();
@@ -142,16 +143,16 @@ export default Model;
 // models
 
 export class User extends Model {
-    get type() { return 'user'; }
+    type: 'user';
 }
 
 export class Group extends Model {
-    get type() { return 'group'; }
+    type: 'group';
 }
 
 
 export class Layer extends Model {
-    get type() { return 'layer'; }
+    type: 'layer';
 
     // getGroup() {
     //     const path = this.getPath();
@@ -178,7 +179,7 @@ export class Layer extends Model {
 }
 
 export class GeoModel extends Model {
-    get type() { return 'geometry'; }
+    // type: 'geometry'; 
 
     getGeometry() {
         const geom = <GeomOpt>this.data.geom;
@@ -192,7 +193,7 @@ export class GeoModel extends Model {
 }
 
 export class Feature extends GeoModel {
-    get type() { return 'feature'; }
+    type: 'feature';
 
     setGeometry(geom: JSONGeometry) {
         this.data.geom = geom;

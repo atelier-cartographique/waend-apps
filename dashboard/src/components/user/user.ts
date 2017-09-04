@@ -2,11 +2,18 @@ import queries from '../../queries/user';
 import events from '../../events/user';
 import { DIV, H1, INPUT, BUTTON, SPAN } from '../elements';
 
+
+
+
 const addAttribute = (
     DIV({ className: 'add-attribute' },
         INPUT({ placeholder: 'key' }),
         INPUT({ placeholder: 'value' }),
-        BUTTON({ onClick: () => 0, className: 'add' }, '+'),
+        BUTTON({
+            onClick: (e) => {
+
+            }, className: 'add'
+        }, '+'),
     ));
 
 const deleteUserKey =

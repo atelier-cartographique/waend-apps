@@ -2,6 +2,7 @@
 
 import { User, Group } from 'waend/lib';
 import { LoginState, defaultLoginState } from '../components/login';
+import { UserData } from '../components/user';
 
 export type AppLayout =
     | 'main'
@@ -19,6 +20,7 @@ export interface IShapeApp {
 
     // 'component/...': ...
     'component/login': LoginState;
+    'component/user': UserData;
 
     // 'port/...': ...
 }
@@ -38,4 +40,5 @@ export const appShape: IShapeApp = {
     'app/user': null,
     'app/layout': 'main',
     'component/login': defaultLoginState(),
+    'component/user': [],
 };

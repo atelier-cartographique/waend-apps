@@ -6,6 +6,7 @@
 
 import { Lens } from 'monocle-ts';
 
+
 export type KeyOfIShape<IShape> = keyof IShape;
 export type SubTypeOfIShape<IShape> = IShape[KeyOfIShape<IShape>];
 
@@ -18,10 +19,12 @@ export interface IObserver<IShape, K extends KeyOfIShape<IShape>> {
     handler(a: IShape[K]): void;
 }
 
+type RO<T> = Readonly<T>;
+
 export interface IStoreInteractions<IShape> {
     dispatch<K extends KeyOfIShape<IShape>>(key: K, handler: IReducer<IShape, IShape[K]>): void;
-    observe<K extends KeyOfIShape<IShape>>(key: K, handler: (a: IShape[K]) => void): void;
-    get<K extends keyof IShape>(key: K): IShape[K];
+    observe<K extends KeyOfIShape<IShape>>(key: K, handler: (a: RO<IShape>[K]) => void): void;
+    get<K extends keyof IShape>(key: K): RO<IShape>[K];
     version(): number;
     reset(n: number): void;
 }
@@ -71,6 +74,7 @@ const proxyfy =
 
 export const source =
     <IShape, KI extends keyof IShape>(localKeys: KI[]) => {
+        // type IShape = Readonly<ProvidedIShape>;
 
 
         const toLocalStorage =
@@ -99,7 +103,7 @@ export const source =
                     localKeys.forEach((key) => {
                         const localState = getLocalStorageValue(storage, key);
                         if (localState) {
-                            state[key] = localState;
+                            // state[key] = localState;
                         }
                     });
                 }
@@ -118,6 +122,7 @@ export const source =
         const start =
             (initialState: IShape, withLocalStorage = true): IStoreInteractions<IShape> => {
 
+                // const initial: option.Option<IShape> = option.some(initialState);
                 const store = [initialState];
                 const observers: IObserver<IShape, KeyOfIShape<IShape>>[] = [];
 
@@ -131,9 +136,9 @@ export const source =
                     const state = head();
                     const value = state[key];
 
-                    if (value instanceof Object) {
-                        return proxyfy(value);
-                    }
+                    // if (value instanceof Object) {
+                    //     return proxyfy(value);
+                    // }
 
                     return value;
                 };

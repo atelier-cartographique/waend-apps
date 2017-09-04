@@ -4,7 +4,12 @@ import maps from './maps';
 import user from './user';
 import { DIV } from "../elements";
 
+export interface UserDataTuple {
+    key: string;
+    value: any;
+}
 
+export type UserData = UserDataTuple[];
 
 const render =
     () => (

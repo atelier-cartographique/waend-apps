@@ -1,11 +1,28 @@
 
 import * as debug from 'debug';
-import { dispatch } from './index';
+import { dispatch, observe } from './index';
 import { getBinder } from 'waend/shell';
 
 
 const logger = debug('waend:events/user');
 
+
+observe('data/user', (user) => {
+    if (!user) {
+        dispatch('component/user', () => []);
+    }
+    else {
+        dispatch('component/user', () => {
+            const data = user.getData();
+            return Object.keys(data).map((k) => {
+                return {
+                    key: k,
+                    value: data[k],
+                }
+            });
+        });
+    }
+});
 
 const events = {
 

@@ -8,8 +8,9 @@ const webpack = require('webpack');
 
 
 const ROOT = resolve(__dirname);
-const BUNDLE_ENTRY_PATH = resolve(ROOT, 'js/dashboard/src/index.js');
-const WAEND_ALIAS_ROOT = resolve(ROOT, 'js/waend/');
+// const BUNDLE_ENTRY_PATH = resolve(ROOT, 'js/dashboard/src/index.js');
+const BUNDLE_ENTRY_PATH = resolve(ROOT, 'src/index.ts');
+const WAEND_ALIAS_ROOT = resolve(ROOT, '../waend/');
 const OUTPUT_DIR = resolve(ROOT, 'dist');
 
 console.log(`ROOT ${ROOT}`);
@@ -42,6 +43,7 @@ module.exports = {
         alias: WAEND_ALIAS,
         // proj4 module declaration is not consistent with its ditribution
         mainFields: ["browser", "main", /* "module" */],
+        extensions: ['.ts', '.js'],
     },
 
     module: {
@@ -52,15 +54,27 @@ module.exports = {
                 loader: 'source-map-loader',
             },
             {
-                test: /\.js$/,
-                loader: 'babel-loader',
+                enforce: 'pre',
+                test: /\.ts$/,
+                use: "source-map-loader"
+            },
+            {
+                test: /\.ts$/,
+                loaders: [
+                    {
+                        loader: 'babel-loader',
+                    },
+                    {
+                        loader: 'ts-loader',
+                    }
+                ],
             }
         ]
     },
     // plugins: [
     //     new webpack.optimize.UglifyJsPlugin(),
     // ]
-    // devtool: 'inline-source-map',
+    devtool: 'inline-source-map',
 };
 
 
