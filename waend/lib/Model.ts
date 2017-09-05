@@ -43,6 +43,23 @@ export function pathKey(objOpt: any, pathOpt: string, def: any): any {
 }
 
 
+// const keys =
+//     (o: any) => Object.keys(o);
+
+// const fold =
+//     (a: (ks: string[], o: any) => any) =>
+//         (b: (ks: string[], o: any) => any) =>
+//             (ks: string[]) =>
+//                 (o: any) =>
+//                     (typeof o === 'object') ? b(ks, o) : a(ks, o);
+// const mark =
+//     (f: (ks: string[], a: any) => any) =>
+//         (ks: string[]) =>
+//             (o: any) => {
+//                 const folder = fold(f)((lks, lo) => mark(f)(lks)(lo));
+//                 return keys(o).map(k => folder(ks.concat([k]))(o[k]));
+
+
 
 // TODO spec params and style interfaces
 
@@ -112,8 +129,8 @@ export class Model {
         }
     }
 
-    delProperty(_key: string) {
-
+    delProperty(key: string) {
+        this.updateProperty(key, null);
     }
 
     toJSON() {

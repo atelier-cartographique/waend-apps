@@ -24,8 +24,8 @@
 
 
 import { CoordLinestring, CoordPolygon, ContextValue, PolygonEnds, DrawingInstruction, PainterCommand, ImageOptions, Transform, Extent } from "../lib";
-import { semaphore } from 'waend-shell';
-import { dom } from 'waend-util';
+// import { Semaphore } from '../shell';
+import { dom } from '../util';
 import ImageLoader from './Image';
 import View, { Context } from './View';
 
@@ -83,7 +83,7 @@ class Painter {
             this.stateInc = 0;
             this.imagesLoading = [];
             this.clear();
-            semaphore.on('view:change', this.resetTransform.bind(this));
+            // semaphore.on('view:change', this.resetTransform.bind(this));
         }
 
     }

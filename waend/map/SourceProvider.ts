@@ -24,7 +24,7 @@
 
 
 import * as Promise from 'bluebird';
-import { ContextIndex, IEventChangeContext, semaphore, getBinder } from 'waend-shell';
+import { ContextIndex, IEventChangeContext, semaphore, getBinder } from '../shell';
 import { Group } from "../lib";
 import Source from './Source';
 

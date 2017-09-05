@@ -1,8 +1,10 @@
 
 import { query } from './index';
 import { Group } from 'waend/lib';
+import { UserDataTuple } from "src/components/user";
 
 
+const attributes = (as: UserDataTuple[]) => as.slice(0, -1).filter(t => t.value !== null);
 
 const queries = {
     getUserName() {
@@ -12,15 +14,19 @@ const queries = {
     },
 
     getAttributes() {
-        return query('component/user').slice(0, -1);
+        return attributes(query('component/user'));
     },
 
     getNewAttribute() {
-        return query('component/user').slice(-1)[0];
+        return [{
+            key: '',
+            value: '',
+            editing: false,
+        }].concat(query('component/user')).slice(-1).pop();
     },
 
     getAttributeKeys() {
-        return query('component/user').slice(0, -1).map(t => t.key);
+        return attributes(query('component/user')).map(t => t.key);
     },
 
     getMaps(): Group[] {

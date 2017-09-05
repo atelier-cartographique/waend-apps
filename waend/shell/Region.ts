@@ -23,7 +23,7 @@
  */
 
 import * as EventEmitter from 'events';
-import { semaphore } from './Semaphore';
+import { Semaphore } from './Semaphore';
 import { Extent, Geometry } from "../lib";
 import { pointProject, pointUnproject } from '../util';
 
@@ -68,10 +68,10 @@ const WORLD_EXTENT = new Extent([-horizMax, -vertiMax, horizMax, vertiMax]);
 export class Region extends EventEmitter {
     private state: Array<Extent>
 
-    constructor() {
+    constructor(private semaphore: Semaphore) {
         super();
         this.state = [WORLD_EXTENT.clone()];
-        semaphore.on('region:push', this.push.bind(this));
+        this.semaphore.on('region:push', this.push.bind(this));
     }
 
     static getWorldExtent() {
@@ -96,7 +96,7 @@ export class Region extends EventEmitter {
     }
 
     emitChange(extent: Extent) {
-        semaphore.signal('region:change', extent);
+        this.semaphore.signal('region:change', extent);
     }
 
     pushExtent(extent: Extent) {
@@ -125,5 +125,5 @@ export class Region extends EventEmitter {
 
 };
 
-export const region: Region = new Region();
+export const region = (s: Semaphore) => new Region(s);
 

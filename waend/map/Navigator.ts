@@ -28,12 +28,12 @@
 import { distance } from "@turf/turf";
 import { point as turfPoint } from "@turf/helpers";
 import { Extent, Transform } from "../lib";
-import { region, semaphore } from 'waend-shell';
+import { region } from '../shell';
 import * as debug from 'debug';
 import View from "./View";
 import WaendMap from "./WaendMap";
 
-import { pointProject, vecDist, dom } from 'waend-util';
+import { pointProject, vecDist, dom } from '../util';
 
 const { isKeyCode, KeyCode, CANVAS } = dom;
 const logger = debug('waend:Navigator');
@@ -300,7 +300,7 @@ export class Navigator {
         this.view = options.view;
 
 
-        semaphore.observe<Extent>('region:change', () => {
+        this.map.getSemaphore().observe<Extent>('region:change', () => {
             const mode = this.getMode();
             if (mode && mode.isActive) {
                 this.draw();

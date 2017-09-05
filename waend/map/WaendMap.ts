@@ -27,7 +27,7 @@
 
 import * as _ from 'lodash';
 import { Extent, Feature } from "../lib";
-import { semaphore, region } from 'waend-shell';
+import { Semaphore, region } from '../shell';
 import Renderer from './Renderer';
 import View, { ViewOptions } from './View';
 import Source from './Source';
@@ -35,6 +35,7 @@ import { pointProject, pointUnproject } from "../util";
 
 export interface MapOptions {
     root: Element;
+    semaphore: Semaphore;
     defaultProgramUrl: string;
     mediaUrl: string;
     projection?: string;
@@ -46,11 +47,13 @@ export default class WaendMap {
     private defaultProgramUrl: string;
     private view: View;
     private renderers: { [id: string]: Renderer };
+    private semaphore: Semaphore;
 
     constructor(options: MapOptions) {
         this.renderers = {};
         this.defaultProgramUrl = options.defaultProgramUrl;
         this.mediaUrl = options.mediaUrl;
+        this.semaphore = options.semaphore;
 
         const vo: ViewOptions = {
             map: this,
@@ -58,20 +61,24 @@ export default class WaendMap {
             root: options.root
         };
 
-        this.view = new View(vo);
+        this.view = new View(vo, this.semaphore);
         this.listenToWaend();
     }
 
+    getSemaphore() {
+        return this.semaphore;
+    }
+
     listenToWaend() {
-        semaphore.observe<Source>('layer:layer:add',
+        this.semaphore.observe<Source>('layer:layer:add',
             this.waendAddSource.bind(this));
-        semaphore.observe<Source>('layer:layer:remove',
+        this.semaphore.observe<Source>('layer:layer:remove',
             this.waendRemoveSource.bind(this));
-        semaphore.observe<Extent>('region:change',
+        this.semaphore.observe<Extent>('region:change',
             this.waendUpdateExtent.bind(this));
-        semaphore.observe<string[]>('visibility:change',
+        this.semaphore.observe<string[]>('visibility:change',
             this.setVisibility.bind(this));
-        semaphore.on('please:map:render',
+        this.semaphore.on('please:map:render',
             this.render.bind(this));
     }
 
@@ -89,7 +96,7 @@ export default class WaendMap {
     }
 
     waendUpdateExtent(extent: Extent) {
-        this.view.setExtent(this.projectedExtent(extent));
+        this.view.setExtent(this.projectedExtent(extent), this.semaphore);
         this.render();
     }
 
@@ -128,7 +135,7 @@ export default class WaendMap {
             view: this.view,
             defaultProgramUrl: this.defaultProgramUrl,
             mediaUrl: this.mediaUrl,
-        });
+        }, this.semaphore);
 
         this.renderers[source.id] = renderer;
         renderer.render();

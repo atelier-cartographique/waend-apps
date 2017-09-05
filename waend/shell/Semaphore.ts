@@ -23,7 +23,9 @@
  */
 
 import * as EventEmitter from 'events';
+import * as debug from 'debug';
 
+const logger = debug('waend:semaphore');
 
 export type Observer<T> = (a: T) => void;
 export type Observer2<T, U> = (a: T, b: U) => void;
@@ -56,4 +58,7 @@ export class Semaphore extends EventEmitter {
 
 }
 
-export const semaphore = new Semaphore();
+export const semaphore = () => new Semaphore();
+export default semaphore;
+
+logger('loaded');

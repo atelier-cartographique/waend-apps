@@ -23,9 +23,9 @@
  */
 
 import * as _ from 'lodash';
-import { semaphore, Region } from 'waend-shell';
+import { Semaphore, Region } from '../shell';
 import { Feature, WaendWorker, PainterCommand, EventRenderFrame, EventCancelFrame, EventRenderInit, EventRenderUpdate } from "../lib";
-import { pointProject } from 'waend-util';
+import { pointProject } from '../util';
 import Painter from './Painter';
 import Source from './Source';
 import View from "./View";
@@ -53,7 +53,7 @@ class CanvasRenderer {
     private frameId: string;
     private defaultProgramUrl: string;
 
-    constructor(options: RendererOptions) {
+    constructor(options: RendererOptions, semaphore: Semaphore) {
         this.id = _.uniqueId();
         this.frameId = 'none';
         this.source = options.source;

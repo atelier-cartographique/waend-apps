@@ -25,10 +25,7 @@ const addAttribute =
             }, '+'),
         ));
 
-const deleteUserKey =
-    (_k: string) => () => {
-        // TODO
-    };
+
 
 const render =
     () => {
@@ -44,7 +41,7 @@ const render =
                 }),
                 BUTTON({
                     className: 'remove',
-                    onClick: deleteUserKey(t.key),
+                    onClick: () => events.deleteKey(t.key),
                 }, '-'));
         });
         return (

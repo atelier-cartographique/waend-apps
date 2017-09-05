@@ -12,7 +12,8 @@ const logger = debug('waend:events/user');
 const cond =
     <T>(t: (a: T) => T, f: (a: T) => T) =>
         (c: boolean) =>
-            (a: T) => c ? t(a) : f(a);
+            (a: T) =>
+                c ? t(a) : f(a);
 
 
 
@@ -100,8 +101,24 @@ const events = {
             )));
     },
 
-    deleteKey(_k: string) {
+    deleteKey(key: string) {
+        const nullify = cond<UserDataTuple>(
+            t => ({ ...t, value: null }),
+            t => t
+        );
+        dispatchComp((kv) => (
+            kv.map(t => nullify(t.key === key)(t))));
 
+        dispatchData((u) => {
+            if (u) {
+                getBinder()
+                    .update(u, key, null)
+                    .then(() => {
+                        dispatchData(u => u);
+                    });
+            }
+            return u;
+        });
     },
 
     createAttribute() {
