@@ -1,0 +1,39 @@
+@import "../../style/waend.less";
+
+.dashboard {
+    .user {
+        padding-bottom: @margin * 2 ;
+        border-bottom: 1px solid @grey-dark;
+
+        .attributes {
+            margin-bottom: @margin;
+        }
+        input {
+            margin-right: @sm-margin;
+            margin-bottom: @sm-margin;
+        }
+    }
+
+
+    .maps {
+        .add-map {
+            margin: @margin 0;
+            &:before {
+                content: "+";
+                width: 1rem;
+                color: @blue;
+                display: inline-block;
+                text-align: center;
+            }
+        }
+
+        li:before {
+            content: "";
+        }
+
+        .edit-map,
+        .view-map {
+            margin-right: @sm-margin;
+        }
+    }
+}

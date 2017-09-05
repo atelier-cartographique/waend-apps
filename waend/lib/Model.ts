@@ -23,7 +23,6 @@
  */
 
 import { isEqual } from 'lodash';
-// import { EventEmitter } from 'events';
 import { GeomOpt, Geometry, JSONGeometry, Extent } from './Geometry';
 
 
@@ -111,6 +110,10 @@ export class Model {
                 }
             }
         }
+    }
+
+    delProperty(_key: string) {
+
     }
 
     toJSON() {

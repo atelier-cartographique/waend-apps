@@ -1,0 +1,97 @@
+
+
+body {
+    font-family: sans-serif;
+    font-size: 14px;
+    padding: @margin;
+}
+
+a {
+    text-decoration: none;
+    &:hover {text-decoration: underline;}
+}
+
+ul {
+    padding: 0;
+}
+
+li {
+    list-style-type: none;
+    padding-left: @margin;
+
+    &:before {
+        content: "•";
+        width: 1rem;
+        display: inline-block;
+        text-align: center;
+    }
+}
+
+label {
+    font-weight: bold;
+}
+
+//********************  INPUTS, TEXT AREAS & FOCUS ***********************//
+
+input {
+    padding: @margin / 2;
+    border: 1px solid @grey-light;
+}
+
+input:focus {
+    border-color: @green;
+}
+
+:focus {
+    outline: 0;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline-offset: 0px;
+}
+
+:focus {
+    outline: 0;
+}
+
+
+
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:@grey-light;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color:@grey-light;
+    opacity:  1;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color:@grey-light;
+    opacity:  1;
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color:@grey-light;
+}
+::-ms-input-placeholder { /* Microsoft Edge */
+    color:@grey-light;
+}
+
+
+//********************  BUTTONS  ***********************//
+
+button {
+    font-family: monospace;
+    min-width: 3rem;
+    padding: @margin / 2 @margin;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+button {
+    .btn-color(@green, @green, @white);
+
+    &.remove {.btn-color(red, red, @white);}
+}

@@ -12,17 +12,10 @@ const logger = debug('waend:events/user');
 const cond =
     <T>(t: (a: T) => T, f: (a: T) => T) =>
         (c: boolean) =>
-            (a: T) => {
-                if (c) {
-                    return t(a);
-                }
-                return f(a);
-            };
+            (a: T) => c ? t(a) : f(a);
 
-const mod =
-    <T>(o: T, k: string, v: any) => {
-        return Object.assign({}, o, { [k]: v });
-    }
+
+
 
 observe('data/user', (user) => {
     if (!user) {
@@ -37,13 +30,15 @@ observe('data/user', (user) => {
                 editing: false,
             };
             return (
-                [newKey].concat(Object.keys(data).map((k) => {
-                    return {
-                        key: k,
-                        value: data[k],
-                        editing: false,
-                    }
-                })));
+                Object.keys(data)
+                    .map((k) => {
+                        return {
+                            key: k,
+                            value: data[k],
+                            editing: false,
+                        }
+                    })
+                    .concat([newKey]));
         });
     }
 });
@@ -63,13 +58,14 @@ const events = {
 
     updateKV(k: string, v: string) {
         const m = cond<UserDataTuple>(
-            (t) => mod(mod(t, 'value', v), 'editing', true),
+            t => ({ ...t, value: v, editing: true }),
             t => t
         );
         dispatchComp((kv) => (
             kv.slice(0, -1)
-                .map(t => mod(t, 'editing', false))
-                .map((t) => m(t.key === k)(t))));
+                .map(t => ({ ...t, editing: false }))
+                .map(t => m(t.key === k)(t))
+                .concat(kv.slice(-1))));
     },
 
     setUserValue(key: string) {
@@ -93,15 +89,19 @@ const events = {
     updateNewKey(k: string) {
         dispatchComp((kv) => (
             kv.slice(0, -1).concat(
-                kv.slice(-1).map(t => mod(t, 'key', k))
+                kv.slice(-1).map(t => ({ ...t, key: k }))
             )));
     },
 
     updateNewValue(v: string) {
         dispatchComp((kv) => (
             kv.slice(0, -1).concat(
-                kv.slice(-1).map(t => mod(t, 'value', v))
+                kv.slice(-1).map(t => ({ ...t, value: v }))
             )));
+    },
+
+    deleteKey(_k: string) {
+
     },
 
     createAttribute() {

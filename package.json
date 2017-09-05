@@ -4,7 +4,9 @@
     "description": "wænd client applications",
     "scripts": {
         "build:dashboard": "webpack --config dashboard/webpack.config.js",
-        "watch:dashboard": "webpack --config dashboard/webpack.config.js --watch"
+        "watch:dashboard": "webpack --config dashboard/webpack.config.js --watch",
+        "build:sign": "webpack --config sign/webpack.config.js",
+        "watch:sign": "webpack --config sign/webpack.config.js --watch"
     },
     "repository": {
         "type": "git",

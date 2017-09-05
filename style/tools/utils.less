@@ -1,0 +1,75 @@
+
+/******** BOX SIZING RESET ********/
+
+html {box-sizing: border-box; }
+*, *:before, *:after {box-sizing: inherit; }
+
+
+
+
+/******** MIXINS & Co ********/
+
+.link {
+    &:hover {}
+    &.active {}
+}
+
+
+.absolute(@top, @right, @bottom, @left) {
+    position: absolute;
+    top: @top;
+    right: @right;
+    bottom: @bottom;
+    left: @left;
+}
+
+.btn-color(@btn-txt-color, @btn-border-color, @btn-back-color) {
+    color: @btn-txt-color;
+    border: 1px solid @btn-back-color;
+    background-color: @btn-back-color;
+    &:hover {
+        border-color: @btn-border-color;
+    }
+}
+
+
+/******** MEDIA QUERIES ********/
+
+@sm: ~"screen and (min-width: 35.5em)"; // 568px
+@md: ~"screen and (min-width: 48em)";   // 768px
+@lg: ~"screen and (min-width: 64em)";   // 1024px
+@xl: ~"screen and (min-width: 80em)";   // 1280px
+
+
+/**PROPORTIONAL FONTSIZE & LINE-HEIGHT**/
+
+/*@media (min-width: 200px) and (max-width: 800px) {
+  body {
+    font-size: calc( 4pt + 2 * ( ( 100vw - 200px) / 600 )) !important;
+    line-height: calc( 5.5pt + 2.75 * ( ( 100vw - 200px) / 600 )) !important;
+  }
+}*/
+
+// @basefontsize : 14px;
+// @baselineheight : 16.5px;
+//
+// @media (max-width: 767px) {
+//   body {
+//     font-size: @basefontsize !important;
+//     line-height: @baselineheight !important;
+//   }
+// }
+//
+// @media (min-width: 767px) and (max-width: 1280px) {
+//   body {
+//     font-size: calc(~"@{basefontsize} + 2 * (( 100vw - 800px) / 480 )") !important;
+//     line-height: calc(~"@{baselineheight} + 2.75 * ( ( 100vw - 800px) / 480 )") !important;
+//   }
+// }
+//
+// @media (min-width: 1280px) {
+//   body {
+//     font-size: @basefontsize + 2 !important;
+//     line-height: @baselineheight + 2.75 !important;
+//   }
+// }

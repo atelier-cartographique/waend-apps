@@ -1,23 +1,14 @@
 
 import { query } from './index';
-import { Group, ModelProperties } from 'waend/lib';
+import { Group } from 'waend/lib';
 
-const getData =
-    (): ModelProperties => {
-        const user = query('data/user');
-        if (user) {
-            return user.getProperties();
-        }
-        return {};
-    };
+
 
 const queries = {
     getUserName() {
-        const data = getData();
-        if ('name' in data) {
-            return data.name.toString();
-        }
-        return 'Missing Name';
+        return (
+            query('component/user')
+                .reduce((acc, t) => t.key === 'name' ? t.value : acc, 'No Name'));
     },
 
     getAttributes() {
