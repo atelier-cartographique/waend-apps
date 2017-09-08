@@ -7,7 +7,7 @@ import { getBinder } from 'waend/shell';
 import events from './events/app';
 import queries from './queries/app';
 import importC from './components/import';
-import { DIV, H1 } from './components/elements';
+import mainC from './components/main';
 
 
 const logger = debug('waend:app');
@@ -17,9 +17,7 @@ const renderImport = () => importC();
 
 const renderMain = (): React.DOMElement<{}, Element> => {
     switch (queries.getLayout()) {
-        case 'main': return DIV({}, H1({
-            onClick: () => events.setLayout('import'),
-        }, 'Waend Map Editor'));
+        case 'main': return mainC();
         case 'import': return renderImport();
     }
 };
@@ -77,7 +75,7 @@ export default (store: IStoreInteractions<IShape>) => {
                 events.setUser(user);
             })
             .catch(() => {
-                document.location.assign('/sign');
+                document.location.assign('/sign/');
             });
     };
 

@@ -28,7 +28,7 @@ const events = {
             })
             .then(() => getBinder().getMe())
             .then(() => {
-                window.location.assign('/dashboard');
+                window.location.assign('/dashboard/');
             });
 
     },
@@ -51,7 +51,7 @@ const events = {
             })
             .then(() => getBinder().getMe())
             .then(() => {
-                window.location.assign('/dashboard');
+                window.location.assign('/dashboard/');
             });
 
     },

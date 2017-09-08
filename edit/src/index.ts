@@ -39,20 +39,24 @@ const displayException = (err: string) => {
 
 
 const withApiUrl =
-    () => {
-        const initialState: IShape = {
-            ...appShape,
-            'data/user': null,
-            'data/groups': [],
+    (wc: any) =>
+        () => {
+            const initialState: IShape = {
+                ...appShape,
+                'data/user': null,
+                'data/groups': [],
+            };
+            if ('args' in wc) {
+                initialState['app/args'] = wc.args;
+            }
+            const start = source<IShape, keyof IShape>(['app/user']);
+            const store = start(initialState);
+            configureEvents(store);
+            configureQueries(store);
+            const app = App(store);
+            logger('start rendering');
+            app.start();
         };
-        const start = source<IShape, keyof IShape>(['app/user']);
-        const store = start(initialState);
-        configureEvents(store);
-        configureQueries(store);
-        const app = App(store);
-        logger('start rendering');
-        app.start();
-    };
 
 
 export const main =
@@ -64,7 +68,7 @@ export const main =
 
         getconfig('apiUrl')
             .then(apiUrl => configureBind(apiUrl, semaphore()))
-            .then(withApiUrl)
+            .then(withApiUrl(wc))
             .catch(err => displayException(`${err}`));
     };
 

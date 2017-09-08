@@ -76,7 +76,7 @@ export default (store: IStoreInteractions<IShape>) => {
                 events.setUser(user);
             })
             .catch(() => {
-                document.location.assign('/sign');
+                document.location.assign('/sign/');
             });
     };
 

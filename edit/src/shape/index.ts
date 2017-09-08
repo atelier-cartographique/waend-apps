@@ -16,6 +16,8 @@ export interface IShapeApp {
     'app/title': string;
     'app/user': string | null;
     'app/layout': AppLayout;
+    'app/args': string[];
+    'app/mapId': string | null;
 
     // 'component/...': ...
     'component/import': ImportState;
@@ -37,5 +39,7 @@ export const appShape: IShapeApp = {
     'app/title': 'dashboard',
     'app/user': null,
     'app/layout': 'main',
+    'app/args': [],
+    'app/mapId': null,
     'component/import': defaultImportState(),
 };

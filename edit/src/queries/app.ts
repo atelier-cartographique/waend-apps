@@ -1,13 +1,16 @@
 
 import { query } from './index';
-import { some, none } from 'fp-ts/lib/Option';
+import { fromNullable } from 'fp-ts/lib/Option';
 
 
 const queries = {
 
+    getArgs() {
+        return query('app/args');
+    },
+
     getUserId() {
-        const u = query('app/user');
-        return u ? some(u) : none;
+        return fromNullable(query('app/user'));
     },
 
     getLayout() {
@@ -22,6 +25,10 @@ const queries = {
             return `${title} - ${userData.name}`;
         }
         return title;
+    },
+
+    getMapId() {
+        return fromNullable(query('app/mapId'));
     },
 
 };
