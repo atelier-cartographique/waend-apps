@@ -25,8 +25,8 @@
 
 import * as SockJS from 'sockjs-client';
 import * as debug from 'debug';
-import { semaphore } from './Semaphore';
-import { ModelData } from "../lib";
+import { Semaphore } from './Semaphore';
+import { ModelData } from '../lib';
 const logger = debug('waend:Sync');
 
 export interface IChannel {
@@ -86,12 +86,14 @@ function makeMessage(json: string): (null | ISyncMessage) {
     }
 }
 
-function sockMessage(evt: MessageEvent) {
-    const message = makeMessage(evt.data);
-    if (message) {
-        semaphore.signal<ISyncMessage>('sync', message);
-    }
-}
+const sockMessage =
+    (semaphore: Semaphore) =>
+        (evt: MessageEvent) => {
+            const message = makeMessage(evt.data);
+            if (message) {
+                semaphore.signal<ISyncMessage>('sync', message);
+            }
+        };
 
 function sockClose(exp: CloseEvent) {
     logger('sync closed', exp);
@@ -99,11 +101,11 @@ function sockClose(exp: CloseEvent) {
 
 
 
-export function configure(url: string) {
+export function configureSync(url: string, semaphore: Semaphore) {
     sock = new SockJS(url);
     sock.onopen = sockOpen;
     sock.onclose = sockClose;
-    sock.onmessage = sockMessage;
+    sock.onmessage = sockMessage(semaphore);
 }
 
 /**

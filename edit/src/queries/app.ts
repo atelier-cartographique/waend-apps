@@ -1,11 +1,13 @@
 
 import { query } from './index';
+import { some, none } from 'fp-ts/lib/Option';
 
 
 const queries = {
 
     getUserId() {
-        return query('app/user');
+        const u = query('app/user');
+        return u ? some(u) : none;
     },
 
     getLayout() {

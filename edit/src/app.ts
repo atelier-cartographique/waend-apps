@@ -6,20 +6,21 @@ import { IStoreInteractions } from './source';
 import { getBinder } from 'waend/shell';
 import events from './events/app';
 import queries from './queries/app';
-import user from './components/user';
-import login from './components/login';
+import importC from './components/import';
+import { DIV, H1 } from './components/elements';
 
 
 const logger = debug('waend:app');
 
 
-const renderLogin = () => login();
-const renderUser = () => user();
+const renderImport = () => importC();
 
 const renderMain = (): React.DOMElement<{}, Element> => {
     switch (queries.getLayout()) {
-        case 'main': return renderUser();
-        case 'login': return renderLogin();
+        case 'main': return DIV({}, H1({
+            onClick: () => events.setLayout('import'),
+        }, 'Waend Map Editor'));
+        case 'import': return renderImport();
     }
 };
 

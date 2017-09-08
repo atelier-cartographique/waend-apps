@@ -38,7 +38,10 @@ module.exports = {
         path: OUTPUT_DIR,
         publicPath: '/',
         filename: '[name].js',
-        chunkFilename: '[id].[hash].chunk.js'
+        chunkFilename: '[id].[hash].chunk.js',
+        library: 'bundle',
+        libraryExport: 'main',
+        libraryTarget: 'var',
     },
 
     resolve: {

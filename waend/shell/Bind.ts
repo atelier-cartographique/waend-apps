@@ -27,20 +27,19 @@ import * as Promise from 'bluebird';
 import * as EventEmitter from 'events';
 import * as debug from 'debug';
 import { Transport } from './Transport';
-import { subscribe } from './Sync';
-import { semaphore } from './Semaphore';
+import { subscribe, ISyncMessage } from './Sync';
+import { Semaphore } from './Semaphore';
 import {
-    Model,
     BaseModelData,
+    Feature,
+    Geometry,
+    Group,
+    JSONGeometry,
+    Layer,
+    Model,
     ModelData,
     User,
-    Group,
-    Layer,
-    Feature,
-    JSONGeometry,
-    Geometry
-} from "../lib";
-import { ISyncMessage } from './Sync';
+} from '../lib';
 const logger = debug('waend:Bind');
 
 
@@ -107,14 +106,14 @@ export class DB extends EventEmitter {
             rec = {
                 model: oldRec.model,
                 comps: oldRec.comps,
-                parent: parent,
-            }
+                parent,
+            };
         }
         else {
             rec = {
-                model: model,
-                comps: comps,
-                parent: parent,
+                model,
+                comps,
+                parent,
             };
         }
         this._db[id] = rec;
@@ -138,7 +137,7 @@ export class DB extends EventEmitter {
                     .put<Model>(options)
                     .then(() => {
                         db[model.id] = {
-                            model: model,
+                            model,
                             comps: record.comps,
                             parent: record.parent,
                         };
@@ -203,14 +202,14 @@ export class Bind extends EventEmitter {
     private groupCache: any;
     db: DB;
 
-    constructor(private apiUrl: string) {
+    constructor(private apiUrl: string, readonly semaphore: Semaphore) {
         super();
         this.transport = new Transport();
         this.db = new DB(this.transport, apiUrl);
         this.featurePages = {};
         this.groupCache = {};
 
-        semaphore.observe<ISyncMessage>('sync',
+        this.semaphore.observe<ISyncMessage>('sync',
             (message) => {
                 const { channel, event, data } = message;
                 if ('update' === event) {
@@ -250,7 +249,7 @@ export class Bind extends EventEmitter {
 
     update(model: Model, key: string, val: any) {
         model.updateProperty(key, val);
-        semaphore.signal('model:set', { key, model });
+        this.semaphore.signal('model:set', { key, model });
         return this.db.update(model);
     }
 
@@ -262,7 +261,7 @@ export class Bind extends EventEmitter {
         else {
             model.setGeometry(geom);
         }
-        semaphore.signal('model:set', { key: 'geom', model });
+        this.semaphore.signal('model:set', { key: 'geom', model });
         return this.db.update(model);
     }
 
@@ -270,7 +269,7 @@ export class Bind extends EventEmitter {
         if (this.db.has(parentId)) {
             const parent = this.db.get(parentId);
             logger('binder.changeParent', parent.id);
-            semaphore.signal('change', { model: parent });
+            this.semaphore.signal('change', { model: parent });
         }
     }
 
@@ -319,7 +318,7 @@ export class Bind extends EventEmitter {
                 const groupData = objectifyResponse(response);
                 const modelData: ModelData = {
                     id: groupData.group.id,
-                    properties: groupData.group.properties
+                    properties: groupData.group.properties,
                 };
                 const g = new Group(modelData);
                 const layers = groupData.group.layers;
@@ -342,12 +341,12 @@ export class Bind extends EventEmitter {
                     subscribe('layer', layer.id);
                 }
 
-                semaphore.signal('stop:loader');
+                this.semaphore.signal('stop:loader');
                 subscribe('group', groupId);
                 return g;
             };
         const url = this.apiUrl + path;
-        semaphore.signal('start:loader', 'downloading map data');
+        this.semaphore.signal('start:loader', 'downloading map data');
         return this.transport.get({ url, parse });
     }
 
@@ -462,7 +461,7 @@ export class Bind extends EventEmitter {
         return this.transport.post({
             url,
             parse,
-            body: data
+            body: data,
         });
     }
 
@@ -483,7 +482,7 @@ export class Bind extends EventEmitter {
         return this.transport.post({
             url,
             parse,
-            body: data
+            body: data,
         });
     }
 
@@ -506,7 +505,7 @@ export class Bind extends EventEmitter {
         return this.transport.post({
             url,
             parse,
-            body: data
+            body: data,
         });
     }
 
@@ -515,8 +514,8 @@ export class Bind extends EventEmitter {
         const path = `/user/${guid}/group/${groupId}/attach/`;
 
         const data = {
-            'layer_id': layerId,
-            'group_id': groupId
+            layer_id: layerId,
+            group_id: groupId,
         };
 
         const url = this.apiUrl + path;
@@ -551,15 +550,18 @@ export class Bind extends EventEmitter {
 
 let bindInstance: Bind;
 
-export function getBinder(apiUrl?: string) {
-    if (!bindInstance) {
-        if (apiUrl) {
-            bindInstance = new Bind(apiUrl);
+export const configure =
+    (apiUrl: string, semaphore: Semaphore) => {
+        if (bindInstance) {
+            throw (new Error('BinderAlreadyConfigured'));
         }
-        else {
-            throw "NeedAnApiUrl";
+        bindInstance = new Bind(apiUrl, semaphore);
+    };
 
+export const getBinder =
+    () => {
+        if (!bindInstance) {
+            throw (new Error('BinderNotConfigured'));
         }
-    }
-    return bindInstance;
-}
+        return bindInstance;
+    };

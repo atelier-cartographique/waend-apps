@@ -17,12 +17,16 @@ const queries = {
         return attributes(query('component/user'));
     },
 
-    getNewAttribute() {
-        return [{
+    getNewAttribute(): UserDataTuple {
+        const last = query('component/user').slice(-1).pop();
+        if (last) {
+            return last;
+        }
+        return {
             key: '',
             value: '',
             editing: false,
-        }].concat(query('component/user')).slice(-1).pop();
+        };
     },
 
     getAttributeKeys() {

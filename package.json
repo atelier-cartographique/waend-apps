@@ -52,6 +52,7 @@
         "fp-ts": "^0.4.6",
         "gl-matrix": "^2.3.2",
         "install-local": "^0.4.0",
+        "io-ts": "^0.7.0",
         "less": "^2.7.2",
         "less-loader": "^4.0.3",
         "lodash": "^4.17.4",

@@ -31,6 +31,9 @@ interface ConfigStore {
 const store: ConfigStore = {};
 
 
+export const setConfig =
+    (k: string, v: string) => store[k] = v;
+
 
 export const getconfig: (a: string) => Promise<string> =
     (key) => {

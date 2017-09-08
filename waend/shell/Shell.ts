@@ -26,12 +26,12 @@ import { EventEmitter } from 'events';
 import * as _ from 'lodash';
 import * as Promise from 'bluebird';
 import * as debug from 'debug';
-import { Stream, User, Model, Group, Layer, Feature, SpanPack } from "../lib";
+import { Stream, User, Model, Group, Layer, Feature, SpanPack } from '../lib';
 import { Context, ContextIndex, ContextOrNull, ICommand } from './Context';
 import { setenv } from './Env';
 import { getBinder } from './Bind';
-import { region, Region } from './Region';
-import { semaphore } from './Semaphore';
+// import { region, Region } from './Region';
+import { Semaphore } from './Semaphore';
 const logger = debug('waend:Shell');
 
 
@@ -70,8 +70,8 @@ function cliSplit(str: string) {
             i += chunk.length + 1;
             ret.push(chunk);
         }
-        else if ("'" === c) {
-            chunk = getCliChunk(chars, i + 1, "'");
+        else if ('\'' === c) {
+            chunk = getCliChunk(chars, i + 1, '\'');
             i += chunk.length + 1;
             ret.push(chunk);
         }
@@ -111,7 +111,7 @@ const defaultDescriptor = {
 
 const rootModel = new Model({
     id: '',
-    properties: {}
+    properties: {},
 });
 
 export type CommandSet = [ICommand[], ICommand[], ICommand[], ICommand[], ICommand[]];
@@ -124,11 +124,11 @@ export class Shell extends EventEmitter {
     stderr: Stream;
     private contexts: [ContextOrNull, ContextOrNull, ContextOrNull, ContextOrNull, ContextOrNull];
     private currentContext: ContextIndex;
-    private postSwitchCallbacks: Array<(() => void)>
+    private postSwitchCallbacks: Array<(() => void)>;
     private user: User | null;
     private previousGroup: string;
 
-    constructor(private commands: CommandSet) {
+    constructor(private commands: CommandSet, readonly semaphore: Semaphore) {
         super();
         this.contexts = [null, null, null, null, null];
         this.contexts[ContextIndex.SHELL] = new Context('root', {
@@ -140,7 +140,7 @@ export class Shell extends EventEmitter {
         this.currentContext = ContextIndex.SHELL;
         this.initStreams();
 
-        semaphore.on('please:shell:context',
+        this.semaphore.on('please:shell:context',
             this.switchContext.bind(this));
 
     }
@@ -156,7 +156,7 @@ export class Shell extends EventEmitter {
         const streams: ISys = {
             stdin: new Stream(),
             stdout: new Stream(),
-            stderr: new Stream()
+            stderr: new Stream(),
         };
 
         Object.defineProperty(this, 'stdin', _.defaults({
@@ -188,23 +188,23 @@ export class Shell extends EventEmitter {
 
         for (let i = 0; i < n; i++) {
             const sys: ISys = {
-                'stdin': (new Stream()),
-                'stdout': (new Stream()),
-                'stderr': this.stderr
+                stdin: (new Stream()),
+                stdout: (new Stream()),
+                stderr: this.stderr,
             };
             pipes.push(sys);
         }
 
         const concentrator: ISys = {
-            'stdin': (new Stream()),
-            'stdout': (new Stream()),
-            'stderr': this.stderr
+            stdin: (new Stream()),
+            stdout: (new Stream()),
+            stderr: this.stderr,
         };
 
         const forward: (a: SpanPack) => void =
             (pack) => {
                 this.stdout.write(pack);
-            }
+            };
 
         pipes.push(concentrator);
         concentrator.stdin.on('data', forward);
@@ -218,9 +218,9 @@ export class Shell extends EventEmitter {
         if (context) {
             try {
                 const sys: ISys = {
-                    'stdin': this.stdin,
-                    'stdout': this.stdout,
-                    'stderr': this.stderr
+                    stdin: this.stdin,
+                    stdout: this.stdout,
+                    stderr: this.stderr,
                 };
 
                 return context.exec(sys, toks)
@@ -311,7 +311,7 @@ export class Shell extends EventEmitter {
                     index: this.currentContext,
                 };
 
-                semaphore.signal<IEventChangeContext>('shell:change:context', event);
+                this.semaphore.signal<IEventChangeContext>('shell:change:context', event);
                 return event;
             };
 
@@ -342,7 +342,7 @@ export class Shell extends EventEmitter {
             if (this.user) {
                 return this.user.id;
             }
-            throw (new Error("you're not logged in"));
+            throw (new Error('you\'re not logged in'));
         }
         return userName;
     }
@@ -361,7 +361,7 @@ export class Shell extends EventEmitter {
                         shell: this,
                         data: userData,
                         commands: this.commands[ContextIndex.USER],
-                        parent
+                        parent,
                     });
                     this.currentContext = ContextIndex.USER;
                     return Promise.resolve(userData);
@@ -382,7 +382,7 @@ export class Shell extends EventEmitter {
                 getBinder()
                     .getGroup(user.id, groupId)
                     .then(groupData => {
-                        this.contexts[ContextIndex.GROUP] = new Context("group", {
+                        this.contexts[ContextIndex.GROUP] = new Context('group', {
                             shell: this,
                             data: groupData,
                             parent: this.contexts[ContextIndex.USER],
@@ -394,13 +394,15 @@ export class Shell extends EventEmitter {
                             this.previousGroup = groupId;
                             if (groupData.has('extent')) {
                                 // it should be an array [minx, miny, maxx, maxy];
-                                const extent = groupData.get('extent',
-                                    Region.getWorldExtent().getArray());
-                                this.postSwitchCallbacks.push(() => {
-                                    semaphore.once('layer:update:complete', () => {
-                                        region.push(extent);
-                                    });
-                                });
+
+                                // FIXME
+                                // const extent = groupData.get('extent',
+                                //     Region.getWorldExtent().getArray());
+                                // // this.postSwitchCallbacks.push(() => {
+                                //     this.semaphore.once('layer:update:complete', () => {
+                                //         region.push(extent);
+                                //     });
+                                // });
                             }
                         }
                         return Promise.resolve(groupData);
@@ -411,7 +413,7 @@ export class Shell extends EventEmitter {
             );
         }
 
-        return Promise.reject<Group>(new Error("SetGroupNoContext"));
+        return Promise.reject<Group>(new Error('SetGroupNoContext'));
     }
 
     setLayer(layerId: string) {
@@ -426,7 +428,7 @@ export class Shell extends EventEmitter {
                 getBinder()
                     .getLayer(user.id, group.id, layerId)
                     .then(layerData => {
-                        this.contexts[ContextIndex.LAYER] = new Context("layer", {
+                        this.contexts[ContextIndex.LAYER] = new Context('layer', {
                             shell: this,
                             data: layerData,
                             parent: this.contexts[ContextIndex.GROUP],
@@ -440,7 +442,7 @@ export class Shell extends EventEmitter {
                     })
             );
         }
-        return Promise.reject<Layer>(new Error("SetLayerNoContext"));
+        return Promise.reject<Layer>(new Error('SetLayerNoContext'));
     }
 
     setFeature(featureId: string) {
@@ -458,7 +460,7 @@ export class Shell extends EventEmitter {
                 getBinder()
                     .getFeature(user.id, group.id, layer.id, featureId)
                     .then(featureData => {
-                        this.contexts[ContextIndex.FEATURE] = new Context("feature", {
+                        this.contexts[ContextIndex.FEATURE] = new Context('feature', {
                             shell: this,
                             data: featureData,
                             parent: this.contexts[ContextIndex.LAYER],
@@ -472,7 +474,7 @@ export class Shell extends EventEmitter {
                     })
             );
         }
-        return Promise.reject<Feature>(new Error("SetFeatureNoContext"));
+        return Promise.reject<Feature>(new Error('SetFeatureNoContext'));
     }
 
     loadUser(path: string[]) {
@@ -518,12 +520,12 @@ export class Shell extends EventEmitter {
 
     loginUser(u: User) {
         this.user = u;
-        semaphore.signal('user:login', u);
+        this.semaphore.signal('user:login', u);
     }
 
     logoutUser() {
         this.user = null;
-        semaphore.signal<void>('user:logout');
+        this.semaphore.signal<void>('user:logout');
     }
 
 }

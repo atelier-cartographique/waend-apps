@@ -6,8 +6,8 @@ import App from './app';
 import { appShape, IShape } from './shape';
 import { configure as configureEvents } from './events';
 import { configure as configureQueries } from './queries';
-import { getconfig } from 'waend/lib';
-import { getBinder } from 'waend/shell';
+import { getconfig, setConfig } from 'waend/lib';
+import { configure as configureBinder, semaphore } from 'waend/shell';
 
 const logger = debug('waend:index');
 
@@ -55,14 +55,18 @@ const withApiUrl =
     };
 
 
-document.onreadystatechange = () => {
-
-    if ('interactive' === document.readyState) {
-        getconfig('apiUrl')
-            .then(getBinder)
-            .then(withApiUrl)
-            .catch(err => displayException(`${err}`));
-    }
-};
+export const main =
+    (wc: any) => {
+        if ('config' in wc) {
+            Object.keys(wc.config)
+                .forEach(k => setConfig(k, wc.config[k]));
+        }
+        if ('interactive' === document.readyState) {
+            getconfig('apiUrl')
+                .then(apiUrl => configureBinder(apiUrl, semaphore()))
+                .then(withApiUrl)
+                .catch(err => displayException(`${err}`));
+        }
+    };
 
 logger('loaded');
