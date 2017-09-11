@@ -404,6 +404,10 @@ export class Bind extends EventEmitter {
         return Promise.resolve(this.db.lookup<Layer>((rec) => rec.parent === groupId));
     }
 
+    getLayersSync(groupId: string) {
+        return this.db.lookup<Layer>(rec => rec.parent === groupId);
+    }
+
     getFeature(userId: string, groupId: string, layerId: string, featureId: string) {
         const db = this.db;
         const path = `/user/${userId}/group/${groupId}/layer/${layerId}/feature/${featureId}`;

@@ -3,7 +3,8 @@ import * as debug from 'debug';
 import { query } from './index';
 import { fromNullable, none, some } from 'fp-ts/lib/Option';
 import { } from 'fp-ts/lib/Either';
-import { ModelData } from 'waend/lib';
+import { Model } from 'waend/lib';
+import { getBinder } from 'waend/shell';
 
 const logger = debug('waend:queries/app');
 
@@ -42,9 +43,10 @@ const queries = {
             queries.getMap()
                 .fold(() => none, (map) => {
                     logger('getCurrentLayer map', map);
+                    const layers = getBinder().getLayersSync(map.id);
                     return (
-                        layerIndex >= 0 && layerIndex < map.layers.length ?
-                            some(map.layers[layerIndex] as ModelData) :
+                        layerIndex >= 0 && layerIndex < layers.length ?
+                            some(layers[layerIndex] as Model) :
                             none);
                 }));
     },
