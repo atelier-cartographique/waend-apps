@@ -23,71 +23,89 @@
  */
 
 
-import * as GeoJSON from 'geojson';
-import { bbox, bboxPolygon } from "@turf/turf";
-import { point as turfPoint } from "@turf/helpers";
+import {
+    DirectGeometryObject,
+    Feature,
+    GeometryObject,
+    LineString as GeoJSONLineString,
+    Point as GeoJSONPoint,
+    Polygon as GeoJSONPolygon,
+    Position,
+} from 'geojson-iots';
+import { bbox, bboxPolygon } from '@turf/turf';
+
+
 
 
 function copy<T>(data: T): T {
     return JSON.parse(JSON.stringify(data));
 }
 
-export type JSONGeometry =
-    GeoJSON.Point
-    | GeoJSON.LineString
-    | GeoJSON.Polygon;
 
+export type CoordPoint = Position;
+export type CoordLinestring = Position[];
+export type CoordPolygon = Position[][];
 export type Coordinates =
-    GeoJSON.Position
-    | GeoJSON.Position[]
-    | GeoJSON.Position[][]
-
-export type CoordPoint = GeoJSON.Position;
-export type CoordLinestring = GeoJSON.Position[];
-export type CoordPolygon = GeoJSON.Position[][];
+    | CoordPoint
+    | CoordLinestring
+    | CoordPolygon
+    ;
 
 export interface IFeature {
-    geometry: JSONGeometry;
+    geometry: DirectGeometryObject;
 }
 
-export type GeomOpt = Geometry | IFeature | JSONGeometry;
+
+export const isDirectGeometry =
+    (g: GeometryObject): g is DirectGeometryObject =>
+        g.type !== 'GeometryCollection';
 
 
-function geomToFeature<T extends JSONGeometry>(geom: T): GeoJSON.Feature<T> {
+const mkPoint =
+    (coordinates: CoordPoint): GeoJSONPoint => ({ type: 'Point', coordinates });
+
+
+
+
+function geomToFeature(geom: DirectGeometryObject): Feature {
     return {
-        type: "Feature",
+        type: 'Feature',
         geometry: geom,
-        properties: {}
+        properties: {},
     };
 };
 
 export class Geometry {
-    protected geometry: JSONGeometry;
+    protected geometry: DirectGeometryObject;
 
-    constructor(data: GeomOpt) {
-        if (data instanceof Geometry) {
-            this.geometry = copy((<Geometry>data).geometry);
+    constructor(data: DirectGeometryObject) {
+        this.geometry = copy(data);
+    }
+
+    static fromJSONGeometry(data: DirectGeometryObject) {
+        return new Geometry(data);
+    }
+
+    static fromJSONFeature(data: Feature) {
+        if (data.geometry !== null && isDirectGeometry(data.geometry)) {
+            return new Geometry(data.geometry);
         }
-        else if ('geometry' in data) { // a feature dict
-            this.geometry = copy((<IFeature>data).geometry);
-        }
-        else if ('type' in data) { // a geometry
-            this.geometry = copy(<JSONGeometry>data);
-        }
-        else {
-            throw (new Error('CanNotBuildGeometry'));
-        }
+        return null;
+    }
+
+    static fromGeometry(data: Geometry) {
+        return new Geometry(data.geometry);
     }
 
     clone() {
-        return (new Geometry(this));
+        return Geometry.fromGeometry(this);
     }
 
     getType() {
         return this.geometry.type;
     }
 
-    getCoordinates(): Coordinates {
+    getCoordinates() {
         return copy(this.geometry.coordinates);
     }
 
@@ -114,9 +132,9 @@ export class LineString extends Geometry {
         return copy<CoordLinestring>(<CoordLinestring>this.geometry.coordinates);
     }
 
-    appendCoordinate(opt_point: GeomOpt) {
-        const p = new Point(opt_point);
-        const geometry = <GeoJSON.LineString>this.geometry;
+    appendCoordinate(optPoint: Position) {
+        const p = new Point(mkPoint(optPoint));
+        const geometry = this.geometry as GeoJSONLineString;
         const coords = p.getCoordinates();
         geometry.coordinates.push(coords);
     }
@@ -140,7 +158,7 @@ export type Rect = {
 export type ExtentOpt = Extent | Geometry | Rect | number[];
 
 export class Extent {
-    protected extent: Array<number>
+    protected extent: number[];
 
     constructor(extent: ExtentOpt) { // whether from an [minx, miny, maxx, maxy] extent or an Extent
         if (extent instanceof Extent) {
@@ -181,7 +199,8 @@ export class Extent {
     }
 
     toPolygon() {
-        return (new Polygon(bboxPolygon(this.extent)));
+        const tmp = bboxPolygon(this.extent) as Feature;
+        return (new Polygon(tmp.geometry as GeoJSONPolygon));
     }
 
     normalize() {
@@ -281,27 +300,27 @@ export class Extent {
     }
 
     getBottomLeft() {
-        const p = turfPoint([this.extent[0], this.extent[1]]);
+        const p = mkPoint([this.extent[0], this.extent[1]]);
         return (new Point(p));
     }
 
     getBottomRight() {
-        const p = turfPoint([this.extent[2], this.extent[1]]);
+        const p = mkPoint([this.extent[2], this.extent[1]]);
         return (new Point(p));
     }
 
     getTopLeft() {
-        const p = turfPoint([this.extent[0], this.extent[3]]);
+        const p = mkPoint([this.extent[0], this.extent[3]]);
         return (new Point(p));
     }
 
     getTopRight() {
-        const p = turfPoint([this.extent[2], this.extent[3]]);
+        const p = mkPoint([this.extent[2], this.extent[3]]);
         return (new Point(p));
     }
 
     getCenter() {
-        const p = turfPoint([
+        const p = mkPoint([
             (this.extent[0] + this.extent[2]) / 2,
             (this.extent[1] + this.extent[3]) / 2
         ]);

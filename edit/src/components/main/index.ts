@@ -29,13 +29,25 @@ const renderNoMap =
         );
     };
 
+const renderMap =
+    (map: Model) => {
+        return (
+            DIV({},
+                `:: ${(<Model>map).get('name', '--')} ::`,
+                DIV({
+                    onClick: () => events.setLayout('import'),
+                }, 'IMPORT'))
+        );
+    };
+
+
 const render =
     () => {
         return (
             queries.getMap()
                 .fold(
-                () => renderNoMap(),
-                map => DIV({}, `:: ${(<Model>map).get('name', '--')} ::`)));
+                renderNoMap,
+                renderMap));
     };
 
 export default render;

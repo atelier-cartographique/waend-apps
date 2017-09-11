@@ -23,13 +23,14 @@
  */
 
 import { isEqual } from 'lodash';
-import { GeomOpt, Geometry, JSONGeometry, Extent } from './Geometry';
+import { Geometry, Extent } from './Geometry';
+import { DirectGeometryObject } from 'geojson-iots';
 
 
 export function pathKey(objOpt: any, pathOpt: string, def: any): any {
     const path = pathOpt.split('.');
     let obj: any = objOpt;
-    for (let i = 0, len = path.length; i < len; i++) {
+    for (let i = 0, len = path.length; i < len; i += 1) {
         if (!obj || (typeof obj !== 'object')) {
             return def;
         }
@@ -69,12 +70,12 @@ export interface ModelProperties {
 
 export interface BaseModelData {
     properties: ModelProperties;
-    geom?: GeomOpt;
+    geom?: DirectGeometryObject;
     [propName: string]: any;
 }
 
 export interface ModelData extends BaseModelData {
-    id: string,
+    id: string;
 }
 
 
@@ -225,12 +226,12 @@ export class GeoModel extends Model {
     // type: 'geometry'; 
 
     getGeometry() {
-        const geom = <GeomOpt>this.data.geom;
+        const geom = this.data.geom as DirectGeometryObject;
         return (new Geometry(geom));
     }
 
     getExtent(): Extent {
-        const geom = <GeomOpt>this.data.geom;
+        const geom = this.data.geom as DirectGeometryObject;
         return (new Geometry(geom)).getExtent();
     }
 }
@@ -238,7 +239,7 @@ export class GeoModel extends Model {
 export class Feature extends GeoModel {
     type: 'feature';
 
-    setGeometry(geom: JSONGeometry) {
+    setGeometry(geom: DirectGeometryObject) {
         this.data.geom = geom;
     }
 }

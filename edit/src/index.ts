@@ -45,6 +45,7 @@ const withApiUrl =
                 ...appShape,
                 'data/user': null,
                 'data/groups': [],
+                'data/map': null,
             };
 
             const start = source<IShape, keyof IShape>(['app/user']);

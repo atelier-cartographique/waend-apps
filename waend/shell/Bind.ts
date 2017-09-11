@@ -29,12 +29,12 @@ import * as debug from 'debug';
 import { Transport } from './Transport';
 import { subscribe, ISyncMessage } from './Sync';
 import { Semaphore } from './Semaphore';
+import { DirectGeometryObject } from 'geojson-iots';
 import {
     BaseModelData,
     Feature,
     Geometry,
     Group,
-    JSONGeometry,
     Layer,
     Model,
     ModelData,
@@ -254,7 +254,7 @@ export class Bind extends EventEmitter {
     }
 
 
-    updateGeometry(model: Feature, geom: JSONGeometry) {
+    updateGeometry(model: Feature, geom: DirectGeometryObject | Geometry) {
         if (geom instanceof Geometry) {
             model.setGeometry(geom.toGeoJSON());
         }
@@ -428,11 +428,10 @@ export class Bind extends EventEmitter {
 
         const url = this.apiUrl + path;
         const db = this.db;
-        const self = this;
 
         const parse = () => {
             db.del(featureId);
-            self.changeParent(layerId);
+            this.changeParent(layerId);
         };
 
         return this.transport.del({ url, parse });
@@ -446,14 +445,13 @@ export class Bind extends EventEmitter {
 
     setGroup(userId: string, data: BaseModelData) {
         const db = this.db;
-        const binder = this;
         const path = `/user/${userId}/group/`;
 
         const parse: IParser<Group> =
             (response) => {
                 const g = new Group(objectifyResponse(response));
                 db.record([userId, g.id], g);
-                binder.changeParent(userId);
+                this.changeParent(userId);
                 return g;
             };
 
@@ -467,14 +465,13 @@ export class Bind extends EventEmitter {
 
     setLayer(userId: string, groupId: string, data: BaseModelData) {
         const db = this.db;
-        const binder = this;
         const path = `/user/${userId}/group/${groupId}/layer/`;
 
         const parse: IParser<Layer> =
             (response) => {
                 const g = new Layer(objectifyResponse(response));
                 db.record([userId, groupId, g.id], g);
-                binder.changeParent(groupId);
+                this.changeParent(groupId);
                 return g;
             };
 
@@ -488,7 +485,6 @@ export class Bind extends EventEmitter {
 
     setFeature(userId: string, groupId: string, layerId: string, data: BaseModelData, batch: boolean) {
         const db = this.db;
-        const binder = this;
         const path = `/user/${userId}/group/${groupId}/layer/${layerId}/feature/`;
 
         const parse: IParser<Feature> =
@@ -496,7 +492,7 @@ export class Bind extends EventEmitter {
                 const f = new Feature(objectifyResponse(response));
                 db.record([userId, groupId, layerId, f.id], f);
                 if (!batch) {
-                    binder.changeParent(layerId);
+                    this.changeParent(layerId);
                 }
                 return f;
             };

@@ -20,8 +20,8 @@ export interface IShapeApp {
     'app/layout': AppLayout;
     'app/args': string[];
     'app/mapId': string | null;
-    'app/map': any;
     'app/new': NewState;
+    'app/layerIndex': number;
 
     // 'component/...': ...
     'component/import': ImportState;
@@ -33,6 +33,7 @@ export interface IShapeApp {
 export interface IShapeData {
     'data/user': User | null;
     'data/groups': Group[];
+    'data/map': any;
 }
 
 export type IShape = IShapeApp & IShapeData;
@@ -45,7 +46,7 @@ export const appShape: IShapeApp = {
     'app/layout': 'main',
     'app/args': [],
     'app/mapId': null,
-    'app/map': null,
     'app/new': null,
+    'app/layerIndex': -1,
     'component/import': defaultImportState(),
 };

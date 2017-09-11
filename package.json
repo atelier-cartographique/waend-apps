@@ -50,6 +50,7 @@
         "extract-text-webpack-plugin": "^2.1.2",
         "file-loader": "^0.11.1",
         "fp-ts": "^0.4.6",
+        "geojson-iots": "^1.0.3",
         "gl-matrix": "^2.3.2",
         "install-local": "^0.4.0",
         "io-ts": "^0.7.0",

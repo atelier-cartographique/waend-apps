@@ -22,6 +22,7 @@ const events = {
 
     setUser(u: User) {
         dispatch('data/user', () => u);
+        dispatch('app/user', () => u.id);
     },
 
     setNewState(s: NewState) {
@@ -31,7 +32,9 @@ const events = {
     loadMap(uid: string, gid: string) {
         getBinder()
             .getGroup(uid, gid)
-            .then(group => dispatch('app/map', () => group))
+            .then((group) => { dispatch('data/map', () => group); return group; })
+            .then(group => dispatch('app/mapId', () => group.id))
+            .then(() => dispatch('app/layerIndex', () => 0))
             .catch(() => logger('Failed loading'));
     },
 
