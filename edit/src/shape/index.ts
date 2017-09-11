@@ -9,6 +9,8 @@ export type AppLayout =
     ;
 
 
+export type NewState = 'initial' | 'processing' | 'done' | 'failed' | null;
+
 // State Interface
 
 
@@ -18,6 +20,8 @@ export interface IShapeApp {
     'app/layout': AppLayout;
     'app/args': string[];
     'app/mapId': string | null;
+    'app/map': any;
+    'app/new': NewState;
 
     // 'component/...': ...
     'component/import': ImportState;
@@ -41,5 +45,7 @@ export const appShape: IShapeApp = {
     'app/layout': 'main',
     'app/args': [],
     'app/mapId': null,
+    'app/map': null,
+    'app/new': null,
     'component/import': defaultImportState(),
 };

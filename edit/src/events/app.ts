@@ -2,7 +2,7 @@
 import * as debug from 'debug';
 import { dispatch } from './index';
 import { query } from '../queries';
-import { AppLayout } from '../shape';
+import { AppLayout, NewState } from '../shape';
 import { User } from 'waend/lib';
 import { fromNullable } from "fp-ts/lib/Option";
 import { getBinder } from "waend/shell";
@@ -16,16 +16,33 @@ const events = {
         dispatch('app/layout', () => l);
     },
 
+    setArgs(args: string[]) {
+        dispatch('app/args', () => args);
+    },
+
     setUser(u: User) {
         dispatch('data/user', () => u);
+    },
+
+    setNewState(s: NewState) {
+        dispatch('app/new', () => s);
+    },
+
+    loadMap(uid: string, gid: string) {
+        getBinder()
+            .getGroup(uid, gid)
+            .then(group => dispatch('app/map', () => group))
+            .catch(() => logger('Failed loading'));
     },
 
     createMap() {
         fromNullable(query('data/user'))
             .map((user) => {
                 const uid = user.id;
+                dispatch('app/new', () => <NewState>'processing');
                 getBinder()
                     .setGroup(uid, {
+                        status_flag: 0,
                         properties: {
                             name: `Untitled ${(new Date()).toLocaleDateString()}`,
                         },
@@ -41,8 +58,9 @@ const events = {
                     })
                     .then((a) => {
                         logger(`All went well and smooth with layer creation ${a.id}`);
+                        dispatch('app/new', () => <NewState>'done');
                     })
-                    .catch(err => logger(`Failed to create map ${err}`));
+                    .catch(() => dispatch('app/new', () => <NewState>'failed'));
             });
     },
 };

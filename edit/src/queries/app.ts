@@ -31,6 +31,14 @@ const queries = {
         return fromNullable(query('app/mapId'));
     },
 
+    getMap() {
+        return fromNullable(query('app/map'));
+    },
+
+    getNew() {
+        return fromNullable(query('app/new'));
+    },
+
 };
 
 export default queries;

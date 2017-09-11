@@ -46,16 +46,14 @@ const withApiUrl =
                 'data/user': null,
                 'data/groups': [],
             };
-            if ('args' in wc) {
-                initialState['app/args'] = wc.args;
-            }
+
             const start = source<IShape, keyof IShape>(['app/user']);
             const store = start(initialState);
             configureEvents(store);
             configureQueries(store);
             const app = App(store);
             logger('start rendering');
-            app.start();
+            app.start(wc);
         };
 
 

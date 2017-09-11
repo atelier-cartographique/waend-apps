@@ -8,9 +8,26 @@ import events from './events/app';
 import queries from './queries/app';
 import importC from './components/import';
 import mainC from './components/main';
+import { fromNullable } from 'fp-ts/lib/Option';
+import { User } from 'waend/lib';
 
 
 const logger = debug('waend:app');
+const MIN_FRAME_RATE = 16;
+
+const parseArgs =
+    (user: User, args: string[]) => {
+        events.setArgs(args);
+        if (args.length > 0) {
+            switch (args[0]) {
+                case 'new':
+                    events.setNewState('initial');
+                    break;
+                default:
+                    events.loadMap(user.id, args[0]);
+            }
+        }
+    };
 
 
 const renderImport = () => importC();
@@ -22,7 +39,6 @@ const renderMain = (): React.DOMElement<{}, Element> => {
     }
 };
 
-const MIN_FRAME_RATE = 16;
 
 export default (store: IStoreInteractions<IShape>) => {
 
@@ -67,12 +83,14 @@ export default (store: IStoreInteractions<IShape>) => {
         requestAnimationFrame(updateState);
     };
 
-    const start = () => {
+    const start = (wc: any) => {
         requestAnimationFrame(updateState);
+        const args = fromNullable(wc.args);
         getBinder()
             .getMe()
             .then((user) => {
                 events.setUser(user);
+                args.map((a) => parseArgs(user, a));
             })
             .catch(() => {
                 document.location.assign('/sign/');
