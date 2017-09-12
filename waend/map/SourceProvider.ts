@@ -24,7 +24,7 @@
 
 
 import * as Promise from 'bluebird';
-import { ContextIndex, IEventChangeContext, semaphore, getBinder } from '../shell';
+import { ContextIndex, IEventChangeContext, Semaphore, getBinder } from '../shell';
 import { Group } from "../lib";
 import Source from './Source';
 
@@ -39,7 +39,7 @@ export class SourceProvider {
     private groupId: string;
     private group: Group;
 
-    constructor() {
+    constructor(private semaphore: Semaphore) {
         this.sources = [];
 
         semaphore.observe<IEventChangeContext>('shell:change:context',
@@ -76,11 +76,11 @@ export class SourceProvider {
             .then(() => {
                 if (this.group.has('visible')) {
                     const layers = this.group.get('visible', []);
-                    semaphore.once('layer:update:complete', () => {
-                        semaphore.signal('visibility:change', layers);
+                    this.semaphore.once('layer:update:complete', () => {
+                        this.semaphore.signal('visibility:change', layers);
                     });
                 }
-                semaphore.signal('source:change', this.getSources());
+                this.semaphore.signal('source:change', this.getSources());
             })
             .catch(console.error.bind(console));
     }
@@ -124,11 +124,7 @@ export class SourceProvider {
     }
 }
 
-let provider: SourceProvider;
 
-export default function (): SourceProvider {
-    if (!provider) {
-        provider = new SourceProvider();
-    }
-    return provider;
+export default function (semaphore: Semaphore): SourceProvider {
+    return new SourceProvider(semaphore);
 };

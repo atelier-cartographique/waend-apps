@@ -27,96 +27,120 @@
 
 import * as _ from 'lodash';
 import { Transform, Extent, Feature } from "../lib";
-import { dom, pointProject, pointUnproject } from "../util";
-import { semaphore, Region } from 'waend-shell';
+import { pointProject, pointUnproject } from "../util";
 import Navigator from './Navigator';
-import WaendMap from './WaendMap';
-import Source from './Source';
+import { fromNullable } from 'fp-ts/lib/Option';
+import { DataQuery, CompQuery, getExtent } from './index';
+import Renderer from './Renderer';
 
 
 const document = window.document;
-
-export interface ViewOptions {
-    root: Element;
-    map: WaendMap;
-    extent: Extent
-}
 
 export interface Context extends CanvasRenderingContext2D {
     id: string;
 }
 
+interface DispositifDeRendu {
+    id: string;
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
+    renderer: Renderer;
+}
+
 export default class View {
-
-    private canvas: HTMLCanvasElement[];
-    private contexts: Context[];
-    private extent: Extent;
-    private sources: Source[];
-    private map: WaendMap;
-    private root: Element;
+    private root: Element | null;
+    private ddr: DispositifDeRendu[];
     readonly navigator: Navigator;
-    readonly transform: Transform;
-    size: { width: number; height: number; };
 
 
 
-    constructor(options: ViewOptions) {
-        this.root = options.root;
-        this.map = options.map;
-        this.extent = options.extent;
-        this.transform = new Transform();
-        this.sources = [];
-        this.canvas = [];
-        this.contexts = [];
-        this.resize();
+    constructor(readonly comp: CompQuery, readonly data: DataQuery) {
+        this.ddr = [];
 
-        this.navigator = new Navigator({
-            'container': this.root,
-            'map': this.map,
-            'view': this
-        });
+        // this.navigator = new Navigator({
+        //     'container': this.root,
+        //     'map': this.map,
+        //     'view': this
+        // });
 
-        window.addEventListener('resize', () => this.resize());
-        semaphore.on('map:resize', () => this.resize());
+        // window.addEventListener('resize', () => this.resize());
+        // semaphore.on('map:resize', () => this.resize());
 
+    }
+
+    get transform() {
+        const extent = this.getAdjustedExtent();
+        const rect = this.getRect();
+        const targetCenter = [rect.width / 2, rect.height / 2];
+        const sourceCenter = extent.getCenter().getCoordinates();
+        const sx = rect.width / Math.abs(extent.getWidth());
+        const sy = rect.height / Math.abs(extent.getHeight());
+        const s = (sx < sy) ? sx : sy;
+        const trX = (targetCenter[0] - sourceCenter[0]) * s;
+        const trY = (targetCenter[1] - sourceCenter[1]) * s;
+        const axis = [targetCenter[0], targetCenter[1]];
+
+        const t = new Transform();
+        t.translate(trX, -trY);
+        t.scale(s, -s, axis);
+        return t;
+    }
+
+    attach(root?: Element) {
+        if (root) {
+            this.root = root;
+            this.ddr.forEach((r) => {
+                root.appendChild(r.canvas);
+            });
+        }
+        else {
+            this.root = null;
+        }
+    }
+
+    render() {
+        this.ddr.forEach(r => r.renderer.render());
     }
 
     resize() {
         const rect = this.getRect();
-        this.size = {
-            width: rect.width,
-            height: rect.height
-        };
         this.setTransform();
-
-        for (const canvas of this.canvas) {
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-        }
+        this.ddr.forEach((r) => {
+            r.canvas.width = rect.width;
+            r.canvas.height = rect.height;
+        });
 
         if (this.navigator) {
             this.navigator.resize();
         }
 
-        semaphore.signal('please:map:render');
-        semaphore.signal<View>('view:resize', this);
     }
 
     getRect() {
-        return this.root.getBoundingClientRect();
+        return fromNullable(this.root).fold(
+            () => ({
+                bottom: 0,
+                height: 0,
+                left: 0,
+                right: 0,
+                top: 0,
+                width: 0,
+            }),
+            root => root.getBoundingClientRect());
     }
 
-    translate(dx: number, dy: number) {
-        this.transform.translate(dx, dy);
-        return this;
-    }
+    // translate(dx: number, dy: number) {
+    //     this.transform.translate(dx, dy);
+    //     return this;
+    // }
 
-    scale(sx: number, sy: number) {
-        this.transform.translate(sx, sy);
-        return this;
-    }
+    // scale(sx: number, sy: number) {
+    //     this.transform.translate(sx, sy);
+    //     return this;
+    // }
 
-    setExtent(extent: Extent) {
+    getAdjustedExtent() {
+        const extent = getExtent(this.comp());
         const rect = this.getRect();
         const sx = rect.width / Math.abs(extent.getWidth());
         const sy = rect.height / Math.abs(extent.getHeight());
@@ -139,34 +163,15 @@ export default class View {
             aExtent[0] = center[0] - adjW;
             aExtent[2] = center[0] + adjW;
         }
-        this.extent = new Extent(aExtent);
-        this.setTransform();
-        semaphore.signal('view:change', this);
+        return (new Extent(aExtent));
     }
 
-    setTransform() {
-        const extent = this.extent;
-        const rect = this.getRect();
-        const targetCenter = [rect.width / 2, rect.height / 2];
-        const sourceCenter = extent.getCenter().getCoordinates();
-        const sx = rect.width / Math.abs(extent.getWidth());
-        const sy = rect.height / Math.abs(extent.getHeight());
-        const s = (sx < sy) ? sx : sy;
-        const trX = (targetCenter[0] - sourceCenter[0]) * s;
-        const trY = (targetCenter[1] - sourceCenter[1]) * s;
-        const axis = [targetCenter[0], targetCenter[1]];
-
-        const t = new Transform();
-        t.translate(trX, -trY);
-        t.scale(s, -s, axis);
-        this.transform.reset(t);
-    }
 
     getGeoExtent() {
         const pWorld = Region.getWorldExtent().getCoordinates();
         const minPWorld = pointProject([pWorld[0], pWorld[1]]);
         const maxPWorld = pointProject([pWorld[2], pWorld[3]]);
-        const pExtent = this.extent.bound(minPWorld.concat(maxPWorld));
+        const pExtent = this.getAdjustedExtent().bound(minPWorld.concat(maxPWorld));
         const projectedMin = pExtent.getBottomLeft().getCoordinates();
         const projectedMax = pExtent.getTopRight().getCoordinates();
         const min = pointUnproject(projectedMin);
@@ -185,72 +190,72 @@ export default class View {
         return this.transform.mapVec2(v);
     }
 
-    getLayer(layerId: string) {
-        const idx = _.findIndex(this.sources, source => layerId === source.id);
-        if (idx < 0) {
-            return null;
-        }
-        return this.sources[idx];
-    }
+    // getLayer(layerId: string) {
+    //     const idx = _.findIndex(this.sources, source => layerId === source.id);
+    //     if (idx < 0) {
+    //         return null;
+    //     }
+    //     return this.sources[idx];
+    // }
 
-    getCanvas(layerId: string) {
-        const idx = _.findIndex(this.canvas, cvns => layerId === cvns.id);
-        if (idx < 0) {
-            return null;
-        }
-        return this.canvas[idx];
-    }
+    // getCanvas(layerId: string) {
+    //     const idx = _.findIndex(this.canvas, cvns => layerId === cvns.id);
+    //     if (idx < 0) {
+    //         return null;
+    //     }
+    //     return this.canvas[idx];
+    // }
 
-    getContext(layerId: string) {
-        const idx = _.findIndex(this.contexts, ctx => layerId === ctx.id);
-        if (idx < 0) {
-            return null;
-        }
-        return this.contexts[idx];
-    }
+    // getContext(layerId: string) {
+    //     const idx = _.findIndex(this.contexts, ctx => layerId === ctx.id);
+    //     if (idx < 0) {
+    //         return null;
+    //     }
+    //     return this.contexts[idx];
+    // }
 
-    getFeatures(extent?: Extent | number[] | rbush.BBox) {
-        return (
-            this.sources.reduce<Feature[]>(
-                (acc, s) => acc.concat(s.getFeatures(extent)), [])
-        );
-    }
+    // getFeatures(extent?: Extent | number[] | rbush.BBox) {
+    //     return (
+    //         this.sources.reduce<Feature[]>(
+    //             (acc, s) => acc.concat(s.getFeatures(extent)), [])
+    //     );
+    // }
 
-    createCanvas(layerId: string) {
-        const canvas = dom.CANVAS();
+    createCanvas() {
+        const canvas = document.createElement('canvas');
         const rect = this.getRect();
 
-        canvas.id = layerId;
         canvas.width = rect.width;
         canvas.height = rect.height;
         canvas.style.position = 'absolute';
         canvas.style.top = '0';
         canvas.style.left = '0';
-        canvas.style.zIndex = (-this.canvas.length).toString();
-        this.canvas.push(canvas);
-        this.root.insertBefore(canvas, this.navigator.getNode());
+        // canvas.style.zIndex = (-this.canvas.length).toString();
+        // this.canvas.push(canvas);
+        // this.root.insertBefore(canvas, this.navigator.getNode());
         return canvas;
     }
 
-    createContext(layerId: string, canvas: HTMLCanvasElement) {
-        const ctx = <Context>canvas.getContext('2d');
-        ctx.id = layerId;
+    createContext(canvas: HTMLCanvasElement) {
+        const ctx = canvas.getContext('2d');
         // here should go some sort of init.
-
-        this.contexts.push(ctx);
-        return (this.contexts.length - 1);
+        if (!ctx) {
+            throw (new Error('Failed to create a 2d context'));
+        }
+        return ctx;
     }
 
-    addSource(source: Source) {
+    addSource(source: any) {
         if (!this.navigator.isStarted) {
             this.navigator.start();
         }
         if (!!(this.getLayer(source.id))) {
             return this;
         }
-        const canvas = this.createCanvas(source.id);
-        this.createContext(source.id, canvas);
-        this.sources.push(source);
+        const id: string = source.id;
+        const canvas = this.createCanvas();
+        const context = this.createContext(canvas);
+        const renderer = 
         return this;
     }
 

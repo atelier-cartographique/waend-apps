@@ -23,20 +23,20 @@
  */
 
 import * as _ from 'lodash';
-import { Semaphore, Region } from '../shell';
-import { Feature, WaendWorker, PainterCommand, EventRenderFrame, EventCancelFrame, EventRenderInit, EventRenderUpdate } from "../lib";
+import {
+    EventCancelFrame,
+    EventRenderFrame,
+    EventRenderInit,
+    EventRenderUpdate,
+    Feature,
+    PainterCommand,
+    WaendWorker,
+} from '../lib';
 import { pointProject } from '../util';
 import Painter from './Painter';
 import Source from './Source';
-import View from "./View";
+import { CompQuery, DataQuery } from './index';
 
-
-export interface RendererOptions {
-    source: Source;
-    view: View;
-    mediaUrl: string;
-    defaultProgramUrl: string;
-}
 
 
 
@@ -44,21 +44,18 @@ class CanvasRenderer {
     private worker: WaendWorker;
     private pendingUpdate: boolean;
     private isReady: boolean;
-    readonly id: string;
     private painter: Painter;
     private visible: boolean;
-    private view: View;
-    private source: Source;
-    private features: { [propName: string]: Feature };
+    // private features: { [propName: string]: Feature };
     private frameId: string;
     private defaultProgramUrl: string;
 
-    constructor(options: RendererOptions, semaphore: Semaphore) {
-        this.id = _.uniqueId();
+    constructor(
+        readonly comp: CompQuery,
+        readonly data: DataQuery,
+        readonly layerId: string) {
+
         this.frameId = 'none';
-        this.source = options.source;
-        this.view = options.view;
-        this.defaultProgramUrl = options.defaultProgramUrl;
         this.visible = true;
         this.painter = new Painter({
             view: this.view,
@@ -67,7 +64,7 @@ class CanvasRenderer {
             mediaUrl: options.mediaUrl,
         });
         this.initWorker();
-        this.features = {};
+        // this.features = {};
 
         this.worker.on('frame',
             (id: string, commands: PainterCommand[]) => {
@@ -75,7 +72,6 @@ class CanvasRenderer {
                     this.painter.processCommands(commands);
                 }
             });
-        semaphore.on('map:update', this.render.bind(this));
     }
 
     setVisibility(v: boolean) {

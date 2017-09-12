@@ -27,64 +27,21 @@
 
 import * as _ from 'lodash';
 import { Extent, Feature } from "../lib";
-import { Semaphore, region } from '../shell';
-import Renderer from './Renderer';
-import View, { ViewOptions } from './View';
+import View from './View';
 import Source from './Source';
 import { pointProject, pointUnproject } from "../util";
+import { CompQuery, DataQuery } from './index';
 
-export interface MapOptions {
-    root: Element;
-    semaphore: Semaphore;
-    defaultProgramUrl: string;
-    mediaUrl: string;
-    projection?: string;
-    extent?: Extent;
-}
+
 
 export default class WaendMap {
-    private mediaUrl: string;
-    private defaultProgramUrl: string;
     private view: View;
-    private renderers: { [id: string]: Renderer };
-    private semaphore: Semaphore;
 
-    constructor(options: MapOptions) {
-        this.renderers = {};
-        this.defaultProgramUrl = options.defaultProgramUrl;
-        this.mediaUrl = options.mediaUrl;
-        this.semaphore = options.semaphore;
-
-        const vo: ViewOptions = {
-            map: this,
-            extent: this.projectedExtent(options.extent || region.get()),
-            root: options.root
-        };
-
-        this.view = new View(vo, this.semaphore);
-        this.listenToWaend();
+    constructor(readonly comp: CompQuery, readonly data: DataQuery) {
+        this.view = new View(comp, data);
     }
 
-    getSemaphore() {
-        return this.semaphore;
-    }
 
-    listenToWaend() {
-        this.semaphore.observe<Source>('layer:layer:add',
-            this.waendAddSource.bind(this));
-        this.semaphore.observe<Source>('layer:layer:remove',
-            this.waendRemoveSource.bind(this));
-        this.semaphore.observe<Extent>('region:change',
-            this.waendUpdateExtent.bind(this));
-        this.semaphore.observe<string[]>('visibility:change',
-            this.setVisibility.bind(this));
-        this.semaphore.on('please:map:render',
-            this.render.bind(this));
-    }
-
-    unlistenToWaend() {
-        // TODO?
-    }
 
     projectedExtent(extent: Extent) {
         const bl = pointProject(
@@ -95,9 +52,9 @@ export default class WaendMap {
         return new Extent(pr);
     }
 
-    waendUpdateExtent(extent: Extent) {
-        this.view.setExtent(this.projectedExtent(extent), this.semaphore);
-        this.render();
+    waendUpdateExtent(_extent: Extent) {
+        // this.view.setExtent(this.projectedExtent(extent), this.semaphore);
+        // this.render();
     }
 
     waendUpdateRegion() {
@@ -119,26 +76,25 @@ export default class WaendMap {
     }
 
     render() {
-        let isBackground = false;
-        _.each(this.renderers, rdr => {
-            rdr.render();
-            if (rdr.isVisible) {
-                isBackground = false;
-            }
-        });
+        this.view.render();
     }
 
-    waendAddSource(source: Source) {
-        this.view.addSource(source);
-        const renderer = new Renderer({
-            source,
-            view: this.view,
-            defaultProgramUrl: this.defaultProgramUrl,
-            mediaUrl: this.mediaUrl,
-        }, this.semaphore);
+    waendAddSource() {
+        // this.view.addSource(source);
+        // const { defaultProgramUrl, mediaUrl } = this.comp()
+        // const renderer = new Renderer({
+        //     source,
+        //     view: this.view,
+        //     defaultProgramUrl: defaultProgramUrl,
+        //     mediaUrl: mediaUrl,
+        // }, this.semaphore);
 
-        this.renderers[source.id] = renderer;
-        renderer.render();
+        // this.renderers[source.id] = renderer;
+        // renderer.render();
+        const { data } = this.data();
+        data.group.layers.forEach((layer: any) => {
+            this.view.addSource(layer);
+        });
     }
 
     waendRemoveSource(source: Source) {

@@ -1,8 +1,7 @@
 import { DIV, H1 } from '../elements';
 import events from '../../events/app';
 import queries from '../../queries/app';
-import { Model } from 'waend/lib';
-
+import { getMapName } from '../../queries/map';
 
 const renderNew =
     () => {
@@ -30,10 +29,10 @@ const renderNoMap =
     };
 
 const renderMap =
-    (map: Model) => {
+    () => {
         return (
             DIV({},
-                `:: ${(<Model>map).get('name', '--')} ::`,
+                `:: ${getMapName()} ::`,
                 DIV({
                     onClick: () => events.setLayout('import'),
                 }, 'IMPORT'))

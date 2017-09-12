@@ -3,12 +3,24 @@ import * as debug from 'debug';
 import { dispatch } from './index';
 import { query } from '../queries';
 import { AppLayout, NewState } from '../shape';
-import { User } from 'waend/lib';
+import { User, getconfig } from 'waend/lib';
 import { fromNullable } from "fp-ts/lib/Option";
-import { getBinder } from "waend/shell";
+import { getBinder, Transport } from "waend/shell";
 
 
 const logger = debug('waend:events/app');
+const transport = new Transport();
+
+const fetchGroup =
+    (apiUrl: string) =>
+        (uid: string, gid: string, parse: (a: any) => any) => {
+            return (
+                transport.get({
+                    url: `${apiUrl}/user/${uid}/group/${gid}`,
+                    parse,
+                })
+            );
+        }
 
 const events = {
 
@@ -30,12 +42,22 @@ const events = {
     },
 
     loadMap(uid: string, gid: string) {
-        getBinder()
-            .getGroup(uid, gid)
-            .then((group) => { dispatch('data/map', () => group); return group; })
-            .then(group => dispatch('app/mapId', () => group.id))
+        // getBinder()
+        //     .getGroup(uid, gid)
+        //     .then((group) => { dispatch('data/map', () => group); return group; })
+        //     .then(group => dispatch('app/mapId', () => group.id))
+        //     .then(() => dispatch('app/layerIndex', () => 0))
+        //     .catch(() => logger('Failed loading'));
+
+        const parse =
+            (data: any) => data;
+
+        getconfig('apiUrl')
+            .then(apiUrl => fetchGroup(apiUrl)(uid, gid, parse))
+            .then(group => dispatch('data/map', () => group))
+            .then(() => dispatch('app/mapId', () => gid))
             .then(() => dispatch('app/layerIndex', () => 0))
-            .catch(() => logger('Failed loading'));
+            .catch(err => logger(`Failed loading ${err}`));
     },
 
     createMap() {

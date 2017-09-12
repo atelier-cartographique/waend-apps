@@ -23,23 +23,23 @@
  */
 
 
-import { CoordLinestring, CoordPolygon, ContextValue, PolygonEnds, DrawingInstruction, PainterCommand, ImageOptions, Transform, Extent } from "../lib";
-// import { Semaphore } from '../shell';
-import { dom } from '../util';
+import {
+    ContextValue,
+    CoordLinestring,
+    CoordPolygon,
+    DrawingInstruction,
+    Extent,
+    ImageOptions,
+    PainterCommand,
+    PolygonEnds,
+    Transform,
+} from "../lib";
 import ImageLoader from './Image';
 import View, { Context } from './View';
 
-const { CANVAS } = dom;
-
-export interface PainterOptions {
-    view: View;
-    layerId: string;
-    mediaUrl: string;
-    defaultProgramUrl: string;
-}
 
 interface TextureRecord {
-    canvas: HTMLCanvasElement,
+    canvas: HTMLCanvasElement;
     context: Context;
 }
 
@@ -56,7 +56,7 @@ class Painter {
     private textures: { [id: string]: TextureRecord };
     context: Context;
 
-    constructor(options: PainterOptions) {
+    constructor(readonly comp: CompQuery, readonly data: DataQuery) {
         this.view = options.view;
         this.mediaUrl = options.mediaUrl;
         this.defaultProgramUrl = options.defaultProgramUrl;
@@ -85,7 +85,6 @@ class Painter {
             this.clear();
             // semaphore.on('view:change', this.resetTransform.bind(this));
         }
-
     }
 
     getMediaUrl() {
@@ -139,7 +138,7 @@ class Painter {
     set(prop: string, value: ContextValue) {
         const ctx = this.context; // just to save keystrokes
         if ('lineDash' === prop) {
-            this.context.setLineDash(<number[]>value);
+            ctx.setLineDash(<number[]>value);
         }
         else {
             switch (prop) {
@@ -206,13 +205,13 @@ class Painter {
     }
 
     startTexture(tid: string) {
-        const canvas = CANVAS();
+        const canvas = document.createElement('canvas');
         canvas.width = this.context.canvas.width;
         canvas.height = this.context.canvas.height;
         const ctx = <Context>canvas.getContext('2d');
         this.textures[tid] = {
             canvas,
-            context: ctx
+            context: ctx,
         };
         this.context = ctx;
     }

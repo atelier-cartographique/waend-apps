@@ -23,16 +23,63 @@
  */
 
 
-import layers from './LayerProvider';
-import sources from './SourceProvider';
+// import layers from './LayerProvider';
+// import sources from './SourceProvider';
 import WaendMap from './WaendMap';
+import { Transform, Extent } from '../lib';
 
-export default function (
-    root: Element,
-    defaultProgramUrl: string,
-    mediaUrl: string,
-    projection?: string): WaendMap {
-    layers();
-    sources();
-    return (new WaendMap({ root, defaultProgramUrl, mediaUrl, projection }));
-} 
+// export default function (
+//     root: Element,
+//     defaultProgramUrl: string,
+//     mediaUrl: string,
+//     projection?: string;
+//     layers();
+//     sources();
+//     return (new WaendMap({ root, defaultProgramUrl, mediaUrl, projection }));
+// } 
+
+export interface MapState {
+    dirty: boolean;
+    defaultProgramUrl: string | null;
+    mediaUrl: string | null;
+    extent: number[];
+    matrix: number[];
+    size: number[];
+};
+
+
+export const defaultMapState =
+    (): MapState => ({
+        dirty: false,
+        defaultProgramUrl: null,
+        mediaUrl: null,
+        extent: [],
+        matrix: [1, 0, 0, 1, 0, 0],
+        size: [],
+    });
+
+
+export type CompQuery = () => MapState;
+export type DataQuery = () => any; // in need for a Group type
+
+export const getTransform =
+    (s: MapState) => {
+        return Transform.fromFlatMatrix(s.matrix);
+    };
+
+
+export const getExtent =
+    (s: MapState) => {
+        return (new Extent(s.extent));
+    };
+
+export const waendMap =
+    (comp: CompQuery, data: DataQuery) => {
+        const wm = new WaendMap(comp, data);
+        return ({
+            attach: (root: Element) => wm.getView().attach(root),
+            render: () => wm.render(),
+        });
+    };
+
+export default waendMap;
