@@ -23,12 +23,36 @@
  */
 
 import * as underscore from 'lodash';
-import { Polygon, Transform, ModelProperties, PainterCommandApplyTexture, PainterCommandClear, PainterCommandClearRect, CoordPolygon, PainterCommandImage, DrawingInstruction, PainterCommandInstructions, PainterCommandRestore, PainterCommandSave, PainterCommandEndTexture, ImageOptions, PainterCommandSet, ContextValue, PainterCommandStartTexture, PainterCommandTransform, PainterCommandLine, CoordLinestring, PolygonEnds, PainterCommandPolygon, PainterCommand } from "waend-lib";
-import { isZero, pathKey, vecDist, lineAngle } from 'waend-util';
+import {
+    ContextValue,
+    CoordLinestring,
+    CoordPolygon,
+    DrawingInstruction,
+    ImageOptions,
+    ModelProperties,
+    PainterCommand,
+    PainterCommandApplyTexture,
+    PainterCommandClear,
+    PainterCommandClearRect,
+    PainterCommandEndTexture,
+    PainterCommandImage,
+    PainterCommandInstructions,
+    PainterCommandLine,
+    PainterCommandPolygon,
+    PainterCommandRestore,
+    PainterCommandSave,
+    PainterCommandSet,
+    PainterCommandStartTexture,
+    PainterCommandTransform,
+    Polygon,
+    PolygonEnds,
+    Transform,
+} from 'waend/lib';
+import { isZero, pathKey, vecDist, lineAngle } from 'waend/util';
 import Text, { Segment, TextCursor } from './Text';
-import { isNumber } from "util";
-import { vec2 } from "gl-matrix";
-import { transformCommand } from "./Font";
+import { isNumber } from 'util';
+import { vec2 } from 'gl-matrix';
+import { transformCommand } from './Font';
 
 
 /*
@@ -156,7 +180,7 @@ export const drawTextInPolygon: (a: Transform, b: Polygon, c: string, d: string,
         }
 
         return paintInstructions(instructions);
-    }
+    };
 
 
 
@@ -197,7 +221,7 @@ const binarySearch: (a: number, b: number, c: BinaryPredicate) => number =
             return binarySearch(pivot + 1, max, predicate);
         }
         return pivot;
-    }
+    };
 
 
 export const drawTextInPolygonAuto: (a: Transform, b: Polygon, c: string, d: string) => PainterCommandInstructions =
@@ -234,7 +258,7 @@ export const drawTextInPolygonAuto: (a: Transform, b: Polygon, c: string, d: str
         const fs = binarySearch(basefs, highfs, predicate);
         return drawTextInPolygon(T, polygon, txt, fontUrl, fs);
 
-    }
+    };
 
 
 
@@ -285,7 +309,7 @@ export const drawTextOnLine: (a: Transform, b: CoordLinestring, c: string, d: st
         }
 
         return paintInstructions(instructions);
-    }
+    };
 
 
 export function getProperty(props: any, key: string, def: any) {
@@ -324,10 +348,10 @@ export const processStyle: (a: PainterCommand[], b: ModelProperties, c: Transfor
             }
         }
         return commands;
-    }
+    };
 
 export const getParameter =
-    (props: ModelProperties, k: string, def: any) => getProperty(props, `params.${k}`, def);
+    <T>(props: ModelProperties, k: string, def: T): T => getProperty(props, `params.${k}`, def);
 
 export const getStyle =
     (props: ModelProperties, k: string, def: any) => getProperty(props, `style.${k}`, def);
@@ -338,68 +362,68 @@ export const getStyle =
 export const paintApplyTexture: (a: string) => PainterCommandApplyTexture =
     (id) => {
         return ['applyTexture', id];
-    }
+    };
 
 
 export const paintClear: () => PainterCommandClear =
     () => {
         return ['clear'];
-    }
+    };
 
 export const paintClearRect: (a: number[]) => PainterCommandClearRect =
     (coords) => {
         return ['clearRect', coords];
-    }
+    };
 
 export const paintEndTexture: () => PainterCommandEndTexture =
     () => {
         return ['endTexture'];
-    }
+    };
 
 export const paintImage: (a: CoordPolygon, b: number[], c: ImageOptions) => PainterCommandImage =
     (coords, extent, options) => {
         return ['image', coords, extent, options];
-    }
+    };
 
 export const paintInstructions: (a: DrawingInstruction[]) => PainterCommandInstructions =
     (instructions) => {
         return ['instructions', instructions];
-    }
+    };
 
 export const paintRestore: () => PainterCommandRestore =
     () => {
         return ['restore'];
-    }
+    };
 
 export const paintSave: () => PainterCommandSave =
     () => {
         return ['save'];
-    }
+    };
 
 export const paintSet: (a: string, b: ContextValue) => PainterCommandSet =
     (key, value) => {
         return ['set', key, value];
-    }
+    };
 
 export const paintStartTexture: (a: string) => PainterCommandStartTexture =
     (id) => {
         return ['startTexture', id];
-    }
+    };
 
 export const paintTransorm: (a: number, b: number, c: number, d: number, e: number, f: number) => PainterCommandTransform =
     (a, b, c, d, e, f) => {
         return ['transform', a, b, c, d, e, f];
-    }
+    };
 
 export const paintLine: (a: CoordLinestring) => PainterCommandLine =
     (coords) => {
         return ['line', coords];
-    }
+    };
 
 export const paintPolygon: (a: CoordPolygon, b: PolygonEnds) => PainterCommandPolygon =
     (coords, ends) => {
         return ['polygon', coords, ends];
-    }
+    };
 
 
 

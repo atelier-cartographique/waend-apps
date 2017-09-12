@@ -23,9 +23,9 @@
  */
 
 
-import { getProperty, paintStartTexture, processStyle, paintPolygon, paintLine, paintEndTexture } from "./context";
-import { ModelProperties, Extent, Transform, PainterCommand } from "waend-lib";
-import { lineTransform } from "waend-util";
+import { getProperty, paintStartTexture, processStyle, paintPolygon, paintLine, paintEndTexture } from './context';
+import { ModelProperties, Extent, Transform, PainterCommand } from 'waend/lib';
+import { lineTransform } from 'waend/util';
 
 
 interface TextureIndex {
@@ -79,7 +79,7 @@ export const addTexture: (z: string, a: ModelProperties, b: Extent, c: Extent, d
                 props.style.fillStyle = strokeColor;
                 processStyle(commands, props, transform);
                 const rcoords = viewport.toPolygon().getCoordinates();
-                commands.push(paintPolygon(rcoords, ['closePath', 'fill']))
+                commands.push(paintPolygon(rcoords, ['closePath', 'fill']));
             }
             else {
                 processStyle(commands, props, transform);
@@ -123,8 +123,8 @@ export const getKey: (a: ModelProperties, b: Extent, c: Extent, d: Transform) =>
         const lineWidth = getProperty(props, 'style.lineWidth', 1);
         const rotation = getProperty(props, 'params.rotation', 0);
         const paramHN = getProperty(props, 'params.hn', 24);
-        let paramStep = getProperty(props, 'step', null);
-        let computedHN = Math.floor(
+        const paramStep = getProperty(props, 'step', null);
+        const computedHN = Math.floor(
             (viewport.getHeight() * paramHN) / extent.getHeight());
         let step = viewport.getHeight() / computedHN;
         if (paramStep) {
@@ -146,7 +146,7 @@ export const getKey: (a: ModelProperties, b: Extent, c: Extent, d: Transform) =>
 export const hasTexture: (a: string) => boolean =
     (key) => {
         return ((key in textureIndex) && textureIndex[key]);
-    }
+    };
 
 export const clearIndex: () => void =
     () => {
@@ -154,4 +154,4 @@ export const clearIndex: () => void =
             .forEach((key) => {
                 textureIndex[key] = false;
             });
-    }
+    };

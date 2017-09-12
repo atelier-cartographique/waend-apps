@@ -5,7 +5,7 @@ import {
     Transform, Model, CoordPolygon, CoordLinestring, CoordPoint
 } from "../lib";
 
-export * from './dom';
+// export * from './dom';
 
 export function getModelName(model: Model) {
     const name = model.get('name', null);

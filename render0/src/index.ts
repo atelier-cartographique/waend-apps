@@ -23,12 +23,11 @@
  */
 
 import { start, FrameFn, DataFn, CancelFrameFn } from './gate';
-import { PainterCommand, CoordLinestring, CoordPolygon, ImageOptions, BaseSource, Extent, Polygon, LineString, GeoModel, ModelProperties, Transform } from "waend-lib";
-import { polygonTransform, polygonProject, lineProject, lineTransform } from "waend-util";
-import { paintLine, paintImage, processStyle, getParameter, paintSave, paintRestore, paintPolygon, paintApplyTexture, drawTextInPolygon, drawTextOnLine, drawTextInPolygonAuto } from "./context";
+import { PainterCommand, CoordLinestring, CoordPolygon, ImageOptions, BaseSource, Extent, Polygon, LineString, GeoModel, ModelProperties, Transform, mkLineString, mkPolygon } from 'waend/lib';
+import { polygonTransform, polygonProject, lineProject, lineTransform } from 'waend/util';
+import { paintLine, paintImage, processStyle, getParameter, paintSave, paintRestore, paintPolygon, paintApplyTexture, drawTextInPolygon, drawTextOnLine, drawTextInPolygonAuto } from './context';
 import { getKey as getTextureKey, addTexture, clearIndex as clearTextureIndex } from './texture';
 import { select as selectFont } from './Font';
-import { lineString as turfLineString, polygon as turfPolygon } from "@turf/helpers";
 
 
 interface FrameLoopIndex {
@@ -38,7 +37,7 @@ interface FrameLoopIndex {
 const loopIndex: FrameLoopIndex = {};
 
 const DEFAULT_FONT_URL = `${self.location.origin}/fonts/default`;
-const dataSource = new BaseSource<GeoModel>()
+const dataSource = new BaseSource<GeoModel>();
 let currentExtent: Extent;
 let currentTransform: Transform;
 let viewport: Extent;
@@ -50,9 +49,9 @@ const textedLine: (a: PainterCommand[], b: CoordLinestring, c: ModelProperties, 
         lineProject(coordinates);
         commands.push(
             drawTextOnLine(T, coordinates,
-                <string>getParameter(props, 'text', ''),
-                <string>getParameter(props, 'fontUrl', DEFAULT_FONT_URL),
-                <number>getParameter(props, 'fontsize', 0))
+                getParameter(props, 'text', ''),
+                getParameter(props, 'fontUrl', DEFAULT_FONT_URL),
+                getParameter(props, 'fontsize', 0)),
         );
     };
 
@@ -62,7 +61,7 @@ const linestring: (b: CoordLinestring, c: ModelProperties, d: Transform) => Pain
     (coordinates, props, T) => {
         const commands: PainterCommand[] = [];
         processStyle(commands, props, T);
-        const txt = getParameter(props, 'text', null);
+        const txt = getParameter<string | null>(props, 'text', null);
         if (txt) {
             const ts = performance.now();
             textedLine(commands, coordinates, props, T);
@@ -71,7 +70,7 @@ const linestring: (b: CoordLinestring, c: ModelProperties, d: Transform) => Pain
         else {
             lineProject(coordinates);
             lineTransform(T, coordinates);
-            const extent = (new LineString(turfLineString(coordinates))).getExtent();
+            const extent = (new LineString(mkLineString(coordinates))).getExtent();
             if ((extent.getHeight() > 1) || (extent.getWidth() > 1)) {
                 commands.push(paintLine(coordinates));
             }
@@ -84,7 +83,7 @@ const hatchedPolygon: (a: PainterCommand[], b: CoordPolygon, d: ModelProperties,
     (commands, coordinates, props, T) => {
         polygonProject(coordinates);
         polygonTransform(T, coordinates);
-        const p = new Polygon(turfPolygon(coordinates));
+        const p = new Polygon(mkPolygon(coordinates));
         const initialExtent = p.getExtent();
         const initialHeight = initialExtent.getHeight();
         const initialWidth = initialExtent.getWidth();
@@ -112,7 +111,7 @@ const hatchedPolygon: (a: PainterCommand[], b: CoordPolygon, d: ModelProperties,
 const textedPolygon: (a: PainterCommand[], b: CoordPolygon, d: ModelProperties, e: Transform) => PainterCommand[] =
     (commands, coordinates, props, T) => {
         polygonProject(coordinates);
-        const p = new Polygon(turfPolygon(coordinates));
+        const p = new Polygon(mkPolygon(coordinates));
         const fontUrl: string = getParameter(props, 'fontUrl', DEFAULT_FONT_URL);
         const fs: number = getParameter(props, 'fontsize', 0);
         const text: string = getParameter(props, 'text', '');
@@ -130,14 +129,14 @@ const imagedPolygon: (a: PainterCommand[], b: CoordPolygon, c: string, d: ModelP
     (commands, coordinates, image, props, T) => {
         polygonProject(coordinates);
         polygonTransform(T, coordinates);
-        const p = new Polygon(turfPolygon(coordinates));
+        const p = new Polygon(mkPolygon(coordinates));
         const extent = p.getExtent().getArray();
 
         const options: ImageOptions = {
             image,
             clip: getParameter(props, 'clip', true),
             adjust: getParameter(props, 'adjust', 'none'), // 'fit', 'cover'
-            rotation: getParameter(props, 'rotation', null)
+            rotation: getParameter<number | undefined>(props, 'rotation', undefined),
         };
 
         commands.push(paintImage(coordinates, extent, options));
@@ -149,8 +148,8 @@ const polygon: (b: CoordPolygon, c: ModelProperties, d: Transform) => PainterCom
     (coordinates, props, T) => {
         const commands: PainterCommand[] = [];
         processStyle(commands, props, T);
-        const img = getParameter(props, 'image', null);
-        const txt = getParameter(props, 'text', null);
+        const img = getParameter<string | null>(props, 'image', null);
+        const txt = getParameter<string | null>(props, 'text', null);
         const ts = performance.now();
         if (img) {
             imagedPolygon(commands, coordinates, img, props, T);
@@ -177,7 +176,7 @@ const initData: DataFn =
         });
         dataSource.buildTree();
         end();
-    }
+    };
 
 
 const updateData: DataFn =
@@ -187,7 +186,7 @@ const updateData: DataFn =
             dataSource.addFeature(new GeoModel(model));
         });
         end();
-    }
+    };
 
 
 // TODO - cache this
@@ -195,7 +194,7 @@ const detectFonts: (a: GeoModel[]) => string[] =
     (models) => {
         return (
             models.reduce<string[]>((acc, model) => {
-                const fontUrl = getParameter(model.getData(), 'fontUrl', null);
+                const fontUrl = getParameter<string | null>(model.getProperties(), 'fontUrl', null);
                 if (!fontUrl) {
                     return acc;
                 }
@@ -205,7 +204,7 @@ const detectFonts: (a: GeoModel[]) => string[] =
                 return acc.concat([fontUrl]);
             }, [DEFAULT_FONT_URL])
         );
-    }
+    };
 
 
 
@@ -222,7 +221,7 @@ const renderFrame: FrameFn =
         polygonTransform(currentTransform, poly);
         const tpoly = new Polygon({
             type: 'Polygon',
-            coordinates: poly
+            coordinates: poly,
         });
         viewport = tpoly.getExtent();
 
@@ -232,7 +231,7 @@ const renderFrame: FrameFn =
             (feature) => {
                 const geom = feature.getGeometry();
                 const geomType = geom.getType();
-                const props = feature.getData();
+                const props = feature.getProperties();
                 switch (geomType) {
                     case 'LineString':
                         return linestring(
@@ -256,13 +255,13 @@ const renderFrame: FrameFn =
 
                 loopIndex[frameId] = self.setInterval(() => {
                     console.log(`Batch ${frameId} ${offset}/${features.length}`);
-                    let commands: PainterCommand[] = [];
+                    const commands: PainterCommand[] = [];
                     const limit = offset + batchSize;
                     for (let i = offset; i < limit; i++) {
                         if (i < features.length) {
                             processFeature(features[i]).forEach((pc) => {
                                 commands.push(pc);
-                            })
+                            });
                         }
                         else {
                             clearInterval(loopIndex[frameId]);
@@ -294,6 +293,6 @@ const cancelFrame: CancelFrameFn =
             clearInterval(loopIndex[frameId]);
             delete loopIndex[frameId];
         }
-    }
+    };
 
 start(initData, updateData, renderFrame, cancelFrame);

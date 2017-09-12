@@ -73,16 +73,10 @@ export class BaseSource<T extends GeoModel> extends EventEmitter {
 
     buildTree() {
         const features = this.features;
-        const flen = features.length;
-        const items: RBushItem[] = [];
         this.tree.clear();
-        for (let i = 0; i < flen; i++) {
-            const feature = features[i];
-            items.push({
-                id: feature.id,
-                ...(feature.getExtent().getDictionary())
-            });
-        }
+        const items: RBushItem[] = features.map(feature => ({
+            id: feature.id, ...(feature.getExtent().getDictionary())
+        }));
         this.tree.load(items);
     }
 

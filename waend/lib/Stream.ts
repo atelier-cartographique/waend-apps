@@ -33,7 +33,7 @@ export enum Status {
 
 export interface Span {
     text: string;
-    fragment?: Element;
+    // fragment?: Element;
     commands?: string[];
     json?: string;
 }

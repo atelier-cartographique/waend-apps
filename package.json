@@ -8,7 +8,9 @@
         "build:sign": "webpack --config sign/webpack.config.js",
         "watch:sign": "webpack --config sign/webpack.config.js --watch",
         "build:edit": "webpack --config edit/webpack.config.js",
-        "watch:edit": "webpack --config edit/webpack.config.js --watch"
+        "watch:edit": "webpack --config edit/webpack.config.js --watch",
+        "build:render0": "webpack --config render0/webpack.config.js",
+        "watch:render0": "webpack --config render0/webpack.config.js --watch"
     },
     "repository": {
         "type": "git",
@@ -32,7 +34,6 @@
         "@types/gl-matrix": "^2.2.34",
         "@types/lodash": "^4.14.53",
         "@types/node": "^7.0.5",
-        "@types/opentype.js": "0.0.0",
         "@types/proj4": "^2.3.4",
         "@types/rbush": "^2.0.2",
         "@types/react": "^15.0.21",

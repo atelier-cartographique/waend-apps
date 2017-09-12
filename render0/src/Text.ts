@@ -23,20 +23,20 @@
  */
 
 import { use as useFont } from './Font';
-import { Font, Path as OTPath } from "opentype.js";
-import { vecDist, vecAdd } from "waend-util";
+import { Font, Path as OTPath } from 'opentype.js';
+import { vecDist, vecAdd } from 'waend/util';
 
 interface Path extends OTPath {
     segment: Segment;
     pos: [number, number];
-    nextPos: [number, number]
+    nextPos: [number, number];
 }
 
 export type Segment = [[number, number], [number, number]];
 
 enum TextMarker {
     END_TEXT = -2,
-    END_PARAGRAPH = -1
+    END_PARAGRAPH = -1,
 }
 
 export class TextCursor {

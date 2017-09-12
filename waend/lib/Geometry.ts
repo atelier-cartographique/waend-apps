@@ -61,8 +61,14 @@ export const isDirectGeometry =
         g.type !== 'GeometryCollection';
 
 
-const mkPoint =
+export const mkPoint =
     (coordinates: CoordPoint): GeoJSONPoint => ({ type: 'Point', coordinates });
+
+export const mkLineString =
+    (coordinates: CoordLinestring): GeoJSONLineString => ({ type: 'LineString', coordinates });
+
+export const mkPolygon =
+    (coordinates: CoordPolygon): GeoJSONPolygon => ({ type: 'Polygon', coordinates });
 
 
 
@@ -73,7 +79,7 @@ function geomToFeature(geom: DirectGeometryObject): Feature {
         geometry: geom,
         properties: {},
     };
-};
+}
 
 export class Geometry {
     protected geometry: DirectGeometryObject;
@@ -153,7 +159,7 @@ export type Rect = {
     left: number;
     right: number;
     bottom: number;
-}
+};
 
 export type ExtentOpt = Extent | Geometry | Rect | number[];
 
@@ -190,7 +196,7 @@ export class Extent {
             minX: this.extent[0],
             minY: this.extent[1],
             maxX: this.extent[2],
-            maxY: this.extent[3]
+            maxY: this.extent[3],
         };
     }
 
@@ -266,7 +272,7 @@ export class Extent {
             c[0] - (wn / 2),
             c[1] - (hn / 2),
             c[0] + (wn / 2),
-            c[1] + (hn / 2)
+            c[1] + (hn / 2),
         ];
         return this;
     }
@@ -322,7 +328,7 @@ export class Extent {
     getCenter() {
         const p = mkPoint([
             (this.extent[0] + this.extent[2]) / 2,
-            (this.extent[1] + this.extent[3]) / 2
+            (this.extent[1] + this.extent[3]) / 2,
         ]);
         return (new Point(p));
     }
@@ -365,7 +371,7 @@ export function toDMS(lat: number, lng: number) {
 
     return [
         `${latD}°`, `${latM}'`, `${latS.toPrecision(4)}'`, latAz,
-        `${lngD}°`, `${lngM}'`, `${lngS.toPrecision(4)}'`, lngAz
+        `${lngD}°`, `${lngM}'`, `${lngS.toPrecision(4)}'`, lngAz,
     ].join(' ');
 }
 

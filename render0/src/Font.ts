@@ -22,12 +22,11 @@
  *  along with waend-render0.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 import { flow } from 'lodash';
 import * as Promise from 'bluebird';
 import * as opentype from 'opentype.js';
-import { vec2 } from "gl-matrix";
-import { DrawingInstruction } from "waend-lib";
+import { vec2 } from 'gl-matrix';
+import { DrawingInstruction } from 'waend/lib';
 
 
 interface FontCollection {
@@ -73,13 +72,13 @@ export const select: (a: string[]) => Promise<FontArray> =
         return (
             Promise.map(urls, loadFont)
         );
-    }
+    };
 
 
 export const use: (a: string) => (opentype.Font | null) =
     (url) => {
         return collection[url];
-    }
+    };
 
 
 type TransformFn = <T extends (vec2 | number[]) >(v: T) => T;
@@ -134,7 +133,7 @@ export const transformCommand: (a: DrawingInstruction[], b: TransformFn[], c: op
             case 'Z':
                 instructions.push(['closePath']);
         }
-    }
+    };
 
 export const Font = opentype.Font;
 export const Glyph = opentype.Glyph;

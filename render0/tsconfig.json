@@ -1,0 +1,46 @@
+{
+    "compilerOptions": {
+        "outDir": "js",
+        "declaration": false,
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "target": "ES6",
+        "alwaysStrict": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitUseStrict": false,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictNullChecks": true,
+        "removeComments": true,
+        "sourceMap": true,
+        "lib": [
+            "es6",
+            "webworker"
+        ],
+        "types": [
+            "lodash",
+            "node"
+        ],
+        "baseUrl": "./",
+        "rootDirs": [
+            "./src",
+            "../"
+        ],
+        "paths": {
+            "waend/*": [
+                "../waend/*"
+            ],
+            "tslib": [
+                "../node_modules/tslib"
+            ],
+            "opentype.js": [
+                "./typings/opentype.js"
+            ]
+        }
+    },
+    "files": [
+        "src/index.ts"
+    ]
+}

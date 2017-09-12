@@ -25,10 +25,9 @@
 import {
     MessageFrame, MessageCancel, MessageInit, MessageUpdate,
     EventRenderFrame, EventCancelFrame, EventRenderInit, EventRenderUpdate,
-    ResponseAck, ResponseFrame
-} from 'waend-lib';
+    ResponseAck, ResponseFrame, ModelData, PainterCommand,
+} from 'waend/lib';
 
-import { ModelData, PainterCommand } from "waend-lib";
 
 
 
@@ -41,7 +40,7 @@ interface RenderMessageEvent extends MessageEvent {
 const scope = <DedicatedWorkerGlobalScope>self;
 
 const emit = function <T>(data: T): void {
-    postMessage(data);
+    scope.postMessage(data);
 };
 
 const emitFrame: (a: string) => (b: PainterCommand[]) => void =

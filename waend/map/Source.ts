@@ -24,7 +24,7 @@
 
 import * as _ from 'lodash';
 import { BaseSource, Layer, Feature, ModelData } from "../lib";
-import { getBinder } from 'waend-shell';
+import { getBinder } from '../shell';
 import * as debug from 'debug';
 const logger = debug('waend:Source');
 

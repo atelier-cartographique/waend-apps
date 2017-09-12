@@ -1,0 +1,10 @@
+{
+    "dependencies": {},
+    "description": "TypeScript definitions for opentype.js",
+    "license": "MIT",
+    "main": "",
+    "name": "@types/opentype.js",
+    "scripts": {},
+    "typeScriptVersion": "2.0",
+    "version": "1.0.3"
+}
