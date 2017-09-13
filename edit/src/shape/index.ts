@@ -2,6 +2,7 @@
 
 import { User, Group } from 'waend/lib';
 import { ImportState, defaultImportState } from '../components/import';
+import { MapState, defaultMapState } from 'waend/map';
 
 export type AppLayout =
     | 'main'
@@ -25,6 +26,7 @@ export interface IShapeApp {
 
     // 'component/...': ...
     'component/import': ImportState;
+    'component/map': MapState;
 
     // 'port/...': ...
 }
@@ -49,4 +51,5 @@ export const appShape: IShapeApp = {
     'app/new': null,
     'app/layerIndex': -1,
     'component/import': defaultImportState(),
+    'component/map': defaultMapState(),
 };

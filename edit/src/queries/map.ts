@@ -23,6 +23,13 @@ const pathKey =
             return obj;
         };
 
+export const getState = () => query('component/map');
+export const getData =
+    () => fromNullable(query('data/map')).fold(
+        () => ({}),
+        data => data.group,
+    );
+
 const getGroupName = pathKey('group.properties.name', 'UnNamed');
 
 export const getMapName =
@@ -30,6 +37,15 @@ export const getMapName =
         () => 'NoMap',
         getGroupName,
     );
+
+export const isDirty =
+    () => query('component/map').dirty;
+
+export const checkRect =
+    (r: ClientRect) => {
+        const sr = query('component/map').rect;
+        return r.width === sr.width && r.height === sr.height;
+    }
 
 logger('loaded');
 

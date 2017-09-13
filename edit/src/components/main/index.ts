@@ -2,6 +2,8 @@ import { DIV, H1 } from '../elements';
 import events from '../../events/app';
 import queries from '../../queries/app';
 import { getMapName } from '../../queries/map';
+import mapViewFunction from '../map';
+
 
 const renderNew =
     () => {
@@ -28,6 +30,8 @@ const renderNoMap =
         );
     };
 
+const mapView = mapViewFunction();
+
 const renderMap =
     () => {
         return (
@@ -35,10 +39,11 @@ const renderMap =
                 `:: ${getMapName()} ::`,
                 DIV({
                     onClick: () => events.setLayout('import'),
-                }, 'IMPORT'))
+                }, 'IMPORT'),
+                mapView(),
+            )
         );
     };
-
 
 const render =
     () => {

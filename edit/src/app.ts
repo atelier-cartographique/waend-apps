@@ -10,6 +10,7 @@ import importC from './components/import';
 import mainC from './components/main';
 import { fromNullable } from 'fp-ts/lib/Option';
 import { User } from 'waend/lib';
+import { DIV } from './components/elements';
 
 
 const logger = debug('waend:app');
@@ -30,12 +31,14 @@ const parseArgs =
     };
 
 
-const renderImport = () => importC();
+
+const wrapMain =
+    (n: React.ReactNode) => DIV({ className: 'edit' }, n);
 
 const renderMain = (): React.DOMElement<{}, Element> => {
     switch (queries.getLayout()) {
-        case 'main': return mainC();
-        case 'import': return renderImport();
+        case 'main': return wrapMain(mainC());
+        case 'import': return wrapMain(importC());
     }
 };
 

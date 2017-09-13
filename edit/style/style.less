@@ -1,43 +1,23 @@
 @import "../../style/waend.less";
 
-.dashboard {
-    .user {
-        padding-bottom: @margin * 2 ;
-        border-bottom: 1px solid @grey-dark;
+.edit {
+    .map {
+        position: relative;
+        width: 600px;
+        height: 600px;
 
-        .attributes {
-            margin-bottom: @margin;
-            span {
-                margin-right: @sm-margin;
-                margin-bottom: @sm-margin;
-            }
+        .map-view{
+            position: absolute;
+            width:100%;
+            height: 100%;
+            z-index: 0;
+            background-color: #B2FF97;
         }
-        input {
-            margin-right: @sm-margin;
-            margin-bottom: @sm-margin;
-        }
-    }
-
-
-    .maps {
-        .add-map {
-            margin: @margin 0;
-            &:before {
-                content: "+";
-                width: 1rem;
-                color: @blue;
-                display: inline-block;
-                text-align: center;
-            }
-        }
-
-        li:before {
-            content: "";
-        }
-
-        .edit-map,
-        .view-map {
-            margin-right: @sm-margin;
+        .map-interactions{
+            position: absolute;
+            width:100%;
+            height: 100%;
+            z-index: 1000;
         }
     }
 }

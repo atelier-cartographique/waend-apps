@@ -23,8 +23,7 @@
  */
 
 import Painter from './Painter';
-import { CoordPolygon, ImageOptions, Extent } from "../lib";
-import { dom } from "../util";
+import { CoordPolygon, ImageOptions, Extent } from '../lib';
 
 
 
@@ -35,7 +34,7 @@ export default class Image {
 
     load(coordinates: CoordPolygon, extentArray: number[], options: ImageOptions) {
         const painter = this.painter;
-        const img = dom.IMG();
+        const img = document.createElement('img');
         const url = `${painter.getMediaUrl()}/${options.image}`;
         const extent = new Extent(extentArray);
         const width = extent.getWidth();

@@ -32,59 +32,51 @@ import {
     ImageOptions,
     PainterCommand,
     PolygonEnds,
-    Transform,
-} from "../lib";
+} from '../lib';
 import ImageLoader from './Image';
-import View, { Context } from './View';
+import { DataQuery, CompQuery } from './index';
+import { getRect } from './queries';
 
 
 interface TextureRecord {
     canvas: HTMLCanvasElement;
-    context: Context;
+    context: CanvasRenderingContext2D;
 }
 
 
 class Painter {
-    private view: View;
     private mediaUrl: string;
-    private defaultProgramUrl: string;
     protected hasContext = false;
     private imagesLoading: ImageLoader[];
     private stateInc: number;
-    private transform: Transform;
     private restoreContext: () => void;
     private textures: { [id: string]: TextureRecord };
-    context: Context;
+    context: CanvasRenderingContext2D;
 
-    constructor(readonly comp: CompQuery, readonly data: DataQuery) {
-        this.view = options.view;
-        this.mediaUrl = options.mediaUrl;
-        this.defaultProgramUrl = options.defaultProgramUrl;
-        const baseContext = this.view.getContext(options.layerId);
-        if (baseContext) {
-            this.hasContext = true;
-            let currentContext: Context = baseContext;
+    constructor(
+        readonly comp: CompQuery,
+        readonly data: DataQuery,
+        baseContext: CanvasRenderingContext2D) {
 
-            Object.defineProperty(this, 'context', {
-                get() {
-                    return currentContext;
-                },
+        let currentContext: CanvasRenderingContext2D = baseContext;
 
-                set(ctx) {
-                    currentContext = ctx;
-                }
-            });
+        Object.defineProperty(this, 'context', {
+            get() {
+                return currentContext;
+            },
 
-            this.restoreContext = () => {
-                currentContext = baseContext;
-            };
+            set(ctx) {
+                currentContext = ctx;
+            },
+        });
 
-            this.transform = this.view.transform.clone();
-            this.stateInc = 0;
-            this.imagesLoading = [];
-            this.clear();
-            // semaphore.on('view:change', this.resetTransform.bind(this));
-        }
+        this.restoreContext = () => {
+            currentContext = baseContext;
+        };
+
+        this.stateInc = 0;
+        this.imagesLoading = [];
+        this.clear();
     }
 
     getMediaUrl() {
@@ -95,14 +87,6 @@ class Painter {
         this.context.setTransform(a, b, c, d, e, f);
     }
 
-    resetTransform() {
-        // const ctx = this.context;
-        const view = this.view;
-        const T = view.transform;
-        this.transform = T.clone();
-    }
-
-
     clear() {
         while (this.stateInc > 0) {
             this.restore();
@@ -110,10 +94,10 @@ class Painter {
         for (let i = 0; i < this.imagesLoading.length; i++) {
             this.imagesLoading[i].cancel();
         }
+        const rect = getRect(this.comp());
         this.imagesLoading = [];
         this.textures = {};
-        this.resetTransform();
-        this.context.clearRect(0, 0, this.view.size.width, this.view.size.height);
+        this.context.clearRect(0, 0, rect.width, rect.height);
         this.context.globalCompositeOperation = 'multiply';
     }
 
@@ -208,12 +192,14 @@ class Painter {
         const canvas = document.createElement('canvas');
         canvas.width = this.context.canvas.width;
         canvas.height = this.context.canvas.height;
-        const ctx = <Context>canvas.getContext('2d');
-        this.textures[tid] = {
-            canvas,
-            context: ctx,
-        };
-        this.context = ctx;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            this.textures[tid] = {
+                canvas,
+                context: ctx,
+            };
+            this.context = ctx;
+        }
     }
 
     endTexture() {

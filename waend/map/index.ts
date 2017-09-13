@@ -26,7 +26,6 @@
 // import layers from './LayerProvider';
 // import sources from './SourceProvider';
 import WaendMap from './WaendMap';
-import { Transform, Extent } from '../lib';
 
 // export default function (
 //     root: Element,
@@ -44,9 +43,8 @@ export interface MapState {
     mediaUrl: string | null;
     extent: number[];
     matrix: number[];
-    size: number[];
+    rect: ClientRect;
 };
-
 
 export const defaultMapState =
     (): MapState => ({
@@ -55,31 +53,30 @@ export const defaultMapState =
         mediaUrl: null,
         extent: [],
         matrix: [1, 0, 0, 1, 0, 0],
-        size: [],
+        rect: {
+            bottom: 0,
+            height: 0,
+            left: 0,
+            right: 0,
+            top: 0,
+            width: 0,
+        },
     });
 
 
 export type CompQuery = () => MapState;
 export type DataQuery = () => any; // in need for a Group type
 
-export const getTransform =
-    (s: MapState) => {
-        return Transform.fromFlatMatrix(s.matrix);
-    };
 
-
-export const getExtent =
-    (s: MapState) => {
-        return (new Extent(s.extent));
-    };
 
 export const waendMap =
     (comp: CompQuery, data: DataQuery) => {
         const wm = new WaendMap(comp, data);
-        return ({
-            attach: (root: Element) => wm.getView().attach(root),
-            render: () => wm.render(),
-        });
+        return wm;
+        // return ({
+        //     attach: (root: Element) => wm.getView().attach(root),
+        //     render: () => wm.render(),
+        // });
     };
 
 export default waendMap;

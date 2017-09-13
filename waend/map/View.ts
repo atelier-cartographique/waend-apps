@@ -24,15 +24,13 @@
 
 // 'use strict';
 
-
-import * as _ from 'lodash';
-import { Transform, Extent, Feature } from "../lib";
-import { pointProject, pointUnproject } from "../util";
-import Navigator from './Navigator';
-import { fromNullable } from 'fp-ts/lib/Option';
-import { DataQuery, CompQuery, getExtent } from './index';
+import * as debug from 'debug';
+// import Navigator from './Navigator';
+import { DataQuery, CompQuery } from './index';
 import Renderer from './Renderer';
+import { getLayers, getRect } from './queries';
 
+const logger = debug('waend:map/view');
 
 const document = window.document;
 
@@ -40,12 +38,16 @@ export interface Context extends CanvasRenderingContext2D {
     id: string;
 }
 
-interface DispositifDeRendu {
+export interface DispositifDeRendu {
     id: string;
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
     renderer: Renderer;
 }
+
+const findR =
+    (id: string) =>
+        (ddr: DispositifDeRendu[]) => ddr.find(r => r.id === id);
 
 export default class View {
     private root: Element | null;
@@ -68,23 +70,7 @@ export default class View {
 
     }
 
-    get transform() {
-        const extent = this.getAdjustedExtent();
-        const rect = this.getRect();
-        const targetCenter = [rect.width / 2, rect.height / 2];
-        const sourceCenter = extent.getCenter().getCoordinates();
-        const sx = rect.width / Math.abs(extent.getWidth());
-        const sy = rect.height / Math.abs(extent.getHeight());
-        const s = (sx < sy) ? sx : sy;
-        const trX = (targetCenter[0] - sourceCenter[0]) * s;
-        const trY = (targetCenter[1] - sourceCenter[1]) * s;
-        const axis = [targetCenter[0], targetCenter[1]];
 
-        const t = new Transform();
-        t.translate(trX, -trY);
-        t.scale(s, -s, axis);
-        return t;
-    }
 
     attach(root?: Element) {
         if (root) {
@@ -99,35 +85,23 @@ export default class View {
     }
 
     render() {
-        this.ddr.forEach(r => r.renderer.render());
+        this.reorderLayers()
+            .forEach(r => r.renderer.render());
     }
 
     resize() {
-        const rect = this.getRect();
-        this.setTransform();
+        const rect = getRect(this.comp());
         this.ddr.forEach((r) => {
             r.canvas.width = rect.width;
             r.canvas.height = rect.height;
         });
 
-        if (this.navigator) {
-            this.navigator.resize();
-        }
+        // if (this.navigator) {
+        //     this.navigator.resize();
+        // }
 
     }
 
-    getRect() {
-        return fromNullable(this.root).fold(
-            () => ({
-                bottom: 0,
-                height: 0,
-                left: 0,
-                right: 0,
-                top: 0,
-                width: 0,
-            }),
-            root => root.getBoundingClientRect());
-    }
 
     // translate(dx: number, dy: number) {
     //     this.transform.translate(dx, dy);
@@ -139,56 +113,6 @@ export default class View {
     //     return this;
     // }
 
-    getAdjustedExtent() {
-        const extent = getExtent(this.comp());
-        const rect = this.getRect();
-        const sx = rect.width / Math.abs(extent.getWidth());
-        const sy = rect.height / Math.abs(extent.getHeight());
-        const s = (sx < sy) ? sx : sy;
-        const center = extent.getCenter().getCoordinates();
-        const aExtent = extent.getArray();
-        if (sx < sy) {
-            // adjust extent height
-            const newHeight = rect.height * (1 / s);
-
-            const adjH = newHeight / 2;
-            aExtent[1] = center[1] - adjH;
-            aExtent[3] = center[1] + adjH;
-        }
-        else {
-            // adjust extent width
-            const newWidth = rect.width * (1 / s);
-
-            const adjW = newWidth / 2;
-            aExtent[0] = center[0] - adjW;
-            aExtent[2] = center[0] + adjW;
-        }
-        return (new Extent(aExtent));
-    }
-
-
-    getGeoExtent() {
-        const pWorld = Region.getWorldExtent().getCoordinates();
-        const minPWorld = pointProject([pWorld[0], pWorld[1]]);
-        const maxPWorld = pointProject([pWorld[2], pWorld[3]]);
-        const pExtent = this.getAdjustedExtent().bound(minPWorld.concat(maxPWorld));
-        const projectedMin = pExtent.getBottomLeft().getCoordinates();
-        const projectedMax = pExtent.getTopRight().getCoordinates();
-        const min = pointUnproject(projectedMin);
-        const max = pointUnproject(projectedMax);
-        return min.concat(max);
-    }
-
-    getProjectedPointOnView(x: number, y: number) {
-        const v = [x, y];
-        const inv = this.transform.inverse();
-        return inv.mapVec2(v);
-    }
-
-    getViewPointProjected(x: number, y: number) {
-        const v = [x, y];
-        return this.transform.mapVec2(v);
-    }
 
     // getLayer(layerId: string) {
     //     const idx = _.findIndex(this.sources, source => layerId === source.id);
@@ -223,7 +147,7 @@ export default class View {
 
     createCanvas() {
         const canvas = document.createElement('canvas');
-        const rect = this.getRect();
+        const rect = getRect(this.comp());
 
         canvas.width = rect.width;
         canvas.height = rect.height;
@@ -246,58 +170,56 @@ export default class View {
     }
 
     addSource(source: any) {
-        if (!this.navigator.isStarted) {
-            this.navigator.start();
-        }
-        if (!!(this.getLayer(source.id))) {
-            return this;
-        }
+        // if (!this.navigator.isStarted) {
+        //     this.navigator.start();
+        // }
+
         const id: string = source.id;
         const canvas = this.createCanvas();
         const context = this.createContext(canvas);
-        const renderer = 
-        return this;
+        const renderer = new Renderer(this.comp, this.data, id, context);
+        const r: DispositifDeRendu = {
+            id,
+            canvas,
+            context,
+            renderer,
+        };
+        this.ddr.push(r);
+        return r;
     }
 
-    removeSource(source: Source) {
-        if (!!(this.getLayer(source.id))) {
-            this.sources = _.reject(this.sources, l => l.id === source.id);
-            this.contexts = _.reject(this.contexts, c => c.id === source.id);
+    // removeSource(source: Source) {
+    //     if (!!(this.getLayer(source.id))) {
+    //         this.sources = _.reject(this.sources, l => l.id === source.id);
+    //         this.contexts = _.reject(this.contexts, c => c.id === source.id);
 
-            const canvasElement = document.getElementById(source.id);
-            if (canvasElement) {
-                this.root.removeChild(canvasElement);
-            }
-            this.canvas = _.reject(this.canvas, c => c.id === source.id);
-        }
-        return this;
-    }
+    //         const canvasElement = document.getElementById(source.id);
+    //         if (canvasElement) {
+    //             this.root.removeChild(canvasElement);
+    //         }
+    //         this.canvas = _.reject(this.canvas, c => c.id === source.id);
+    //     }
+    //     return this;
+    // }
 
-    reorderLayers(ids: string[]) {
-        const ll = this.sources.length;
-
-        this.canvas.forEach(cnvs => {
-            cnvs.style.zIndex = (-ll).toString();
-        });
-
-        for (let i = 0; i < ids.length; i++) {
-            const id = ids[i];
-            const cnvs = this.getCanvas(id);
-            if (cnvs) {
-                cnvs.style.zIndex = (-i).toString();
-            }
-        }
-
+    reorderLayers() {
+        return getLayers(this.data())
+            .map((layer: any, idx: number) => {
+                let r = findR(layer.id)(this.ddr);
+                if (!r) {
+                    r = this.addSource(layer);
+                }
+                r.canvas.style.zIndex = (-idx).toString();
+                return r;
+            });
     }
 
     forEachImage(fn: (a: ImageData) => void) {
-        const rect = this.getRect();
-
-        for (const source of this.contexts) {
-            const img = source.getImageData(0, 0, rect.width, rect.height);
-            // context.putImageData(img, 0, 0);
-            fn(img);
-        }
+        const rect = getRect(this.comp());
+        this.ddr.forEach((r) => {
+            fn(r.context.getImageData(0, 0, rect.width, rect.height));
+        });
     }
 }
 
+logger('loaded');

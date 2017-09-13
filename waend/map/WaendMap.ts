@@ -25,13 +25,10 @@
 // 'use strict';
 
 
-import * as _ from 'lodash';
-import { Extent, Feature } from "../lib";
+import { Extent } from '../lib';
 import View from './View';
-import Source from './Source';
-import { pointProject, pointUnproject } from "../util";
+import { pointProject } from '../util';
 import { CompQuery, DataQuery } from './index';
-
 
 
 export default class WaendMap {
@@ -40,8 +37,6 @@ export default class WaendMap {
     constructor(readonly comp: CompQuery, readonly data: DataQuery) {
         this.view = new View(comp, data);
     }
-
-
 
     projectedExtent(extent: Extent) {
         const bl = pointProject(
@@ -52,78 +47,62 @@ export default class WaendMap {
         return new Extent(pr);
     }
 
-    waendUpdateExtent(_extent: Extent) {
-        // this.view.setExtent(this.projectedExtent(extent), this.semaphore);
-        // this.render();
-    }
+    // waendUpdateExtent(_extent: Extent) {
+    //     // this.view.setExtent(this.projectedExtent(extent), this.semaphore);
+    //     // this.render();
+    // }
 
-    waendUpdateRegion() {
-    }
+    // waendUpdateRegion() {
+    // }
 
-    setVisibility(layerIds: string[]) {
-        Object.keys(this.renderers)
-            .forEach((id) => {
-                const renderer = this.renderers[id];
-                const vs = renderer.isVisible();
-                const ts = _.indexOf(layerIds, id) >= 0;
-                if (ts !== vs) {
-                    renderer.setVisibility(ts);
-                    renderer.render();
-                }
-            });
+    // setVisibility(layerIds: string[]) {
+    //     Object.keys(this.renderers)
+    //         .forEach((id) => {
+    //             const renderer = this.renderers[id];
+    //             const vs = renderer.isVisible();
+    //             const ts = _.indexOf(layerIds, id) >= 0;
+    //             if (ts !== vs) {
+    //                 renderer.setVisibility(ts);
+    //                 renderer.render();
+    //             }
+    //         });
 
-        this.view.reorderLayers(layerIds);
-    }
+    //     this.view.reorderLayers(layerIds);
+    // }
 
     render() {
         this.view.render();
     }
 
-    waendAddSource() {
-        // this.view.addSource(source);
-        // const { defaultProgramUrl, mediaUrl } = this.comp()
-        // const renderer = new Renderer({
-        //     source,
-        //     view: this.view,
-        //     defaultProgramUrl: defaultProgramUrl,
-        //     mediaUrl: mediaUrl,
-        // }, this.semaphore);
+    // waendAddSource() {
+    //     // this.view.addSource(source);
+    //     // const { defaultProgramUrl, mediaUrl } = this.comp()
+    //     // const renderer = new Renderer({
+    //     //     source,
+    //     //     view: this.view,
+    //     //     defaultProgramUrl: defaultProgramUrl,
+    //     //     mediaUrl: mediaUrl,
+    //     // }, this.semaphore);
 
-        // this.renderers[source.id] = renderer;
-        // renderer.render();
-        const { data } = this.data();
-        data.group.layers.forEach((layer: any) => {
-            this.view.addSource(layer);
-        });
-    }
+    //     // this.renderers[source.id] = renderer;
+    //     // renderer.render();
 
-    waendRemoveSource(source: Source) {
-        this.renderers[source.id].stop();
-        delete this.renderers[source.id];
-        this.view.removeSource(source);
-    }
+    // }
 
-    getCoordinateFromPixel(pixel: number[]) {
-        const v = [pixel[0], pixel[1]];
-        const inverse = this.view.transform.inverse();
-        const tv = inverse.mapVec2(v);
-        // logger('map.getCoordinateFromPixel', v, inverse.flatMatrix(), tv);
-        return pointUnproject(tv);
-    }
+    // waendRemoveSource(source: Source) {
+    //     this.renderers[source.id].stop();
+    //     delete this.renderers[source.id];
+    //     this.view.removeSource(source);
+    // }
 
-    getPixelFromCoordinate(coord: number[]) {
-        const v = [coord[0], coord[1]];
-        const pv = pointProject(v);
-        const tv = this.view.transform.mapVec2(pv);
-        return tv;
-    }
+
 
     getView() {
         return this.view;
     }
 
-    getFeatures(extent?: Extent | number[] | rbush.BBox): Feature[] {
-        return this.view.getFeatures(extent);
-    }
+    // getFeatures(extent?: Extent | number[] | rbush.BBox): Feature[] {
+    //     return this.view.getFeatures(extent);
+    // }
 }
 
