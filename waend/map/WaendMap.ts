@@ -24,10 +24,7 @@
 
 // 'use strict';
 
-
-import { Extent } from '../lib';
 import View from './View';
-import { pointProject } from '../util';
 import { CompQuery, DataQuery } from './index';
 
 
@@ -38,14 +35,7 @@ export default class WaendMap {
         this.view = new View(comp, data);
     }
 
-    projectedExtent(extent: Extent) {
-        const bl = pointProject(
-            extent.getBottomLeft().getCoordinates());
-        const tr = pointProject(
-            extent.getTopRight().getCoordinates());
-        const pr = [bl[0], bl[1], tr[0], tr[1]];
-        return new Extent(pr);
-    }
+
 
     // waendUpdateExtent(_extent: Extent) {
     //     // this.view.setExtent(this.projectedExtent(extent), this.semaphore);

@@ -42,7 +42,6 @@ export interface MapState {
     defaultProgramUrl: string | null;
     mediaUrl: string | null;
     extent: number[];
-    matrix: number[];
     rect: ClientRect;
 };
 
@@ -52,7 +51,6 @@ export const defaultMapState =
         defaultProgramUrl: null,
         mediaUrl: null,
         extent: [],
-        matrix: [1, 0, 0, 1, 0, 0],
         rect: {
             bottom: 0,
             height: 0,

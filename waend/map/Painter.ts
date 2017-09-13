@@ -23,6 +23,7 @@
  */
 
 
+import * as debug from 'debug';
 import {
     ContextValue,
     CoordLinestring,
@@ -37,6 +38,7 @@ import ImageLoader from './Image';
 import { DataQuery, CompQuery } from './index';
 import { getRect } from './queries';
 
+const logger = debug('waend:map/painter');
 
 interface TextureRecord {
     canvas: HTMLCanvasElement;
@@ -256,15 +258,14 @@ class Painter {
     drawLine(coordinates: CoordLinestring) {
         // logger('painter.line', coordinates[0]);
         this.context.beginPath();
-        for (let i = 0; i < coordinates.length; i++) {
-            const p = coordinates[i];
+        coordinates.forEach((p, i) => {
             if (0 === i) {
                 this.context.moveTo(p[0], p[1]);
             }
             else {
                 this.context.lineTo(p[0], p[1]);
             }
-        }
+        })
         // this.context.closePath();
         this.context.stroke();
     }
@@ -329,6 +330,10 @@ class Painter {
             const arg4 = command[5];
             const arg5 = command[6];
 
+            // const args = command.slice(1) as any[];
+            // logger(`command ${commandName}`,
+            //     args.reduce((acc: string, v: any) => acc.concat(`${v}`), ''));
+
 
             switch (commandName) {
                 case 'set':
@@ -377,3 +382,5 @@ class Painter {
 
 
 export default Painter;
+
+logger('loaded');

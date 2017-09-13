@@ -95,7 +95,7 @@ const hatchedPolygon: (a: PainterCommand[], b: CoordPolygon, d: ModelProperties,
         const [key, hasTexture] = getTextureKey(props, viewport, initialExtent, T);
 
         if (!hasTexture) {
-            console.log(`Missing Texture ${key}`);
+            // console.log(`Missing Texture ${key}`);
             addTexture(key, props, viewport, initialExtent, T)
                 .forEach(c => { commands.push(c); });
         }
@@ -174,6 +174,8 @@ const initData: DataFn =
             dataSource.addFeature(new GeoModel(model), true);
 
         });
+        console.log(`initData ${dataSource.getLength()}`);
+
         dataSource.buildTree();
         end();
     };
@@ -217,14 +219,18 @@ const renderFrame: FrameFn =
         clearTextureIndex();
 
         const poly = currentExtent.toPolygon().getCoordinates();
+        console.log(`poly ${poly}`);
         polygonProject(poly);
+        console.log(`projected poly ${poly}`);
         polygonTransform(currentTransform, poly);
+        console.log(`transformed poly ${poly}`);
         const tpoly = new Polygon({
             type: 'Polygon',
             coordinates: poly,
         });
         viewport = tpoly.getExtent();
-
+        // console.log(`viewport ${viewport.getArray()}`);
+        // console.log(`Matrix ${opt_matrix}`);
         const features = dataSource.getFeatures(opt_extent);
 
         const processFeature: (a: GeoModel) => PainterCommand[] =

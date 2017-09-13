@@ -1,6 +1,13 @@
 import { DIV } from '../elements';
-import { bufferExtent } from '../../events/map';
+import { bufferExtent, zoomToMapExtent } from '../../events/map';
 
+const zoomToExtent =
+    () => DIV({
+        className: 'zoom-extent',
+        onClick: () => {
+            zoomToMapExtent();
+        },
+    }, 'z');
 
 const zoomIn =
     () => DIV({
@@ -14,7 +21,9 @@ const render =
     () => DIV({
         className: 'map-interactions',
     },
-        zoomIn());
+        zoomIn(),
+        zoomToExtent(),
+    );
 
 
 export default render;

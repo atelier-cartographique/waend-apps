@@ -1,7 +1,7 @@
 
 import { DIV } from '../elements';
 import { getState, getData, isDirty, checkRect } from '../../queries/map';
-import { setRect } from '../../events/map';
+import { setRect, markClean } from '../../events/map';
 import interactions from './interactions';
 import wmap from 'waend/map';
 
@@ -14,6 +14,7 @@ const renderFn =
             () => {
                 if (isDirty()) {
                     map.render();
+                    markClean();
                 }
                 return (
                     DIV({ className: 'map' },

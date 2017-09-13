@@ -1,7 +1,11 @@
 
+import * as debug from 'debug';
 import { dispatch, observe } from './index';
 import { Extent } from 'waend/lib';
 import { MapState } from 'waend/map';
+import { getMapExtent } from '../queries/map';
+
+const logger = debug('waend:events/map');
 
 const dirty = (s: MapState) => ({ ...s, dirty: true });
 const clean = (s: MapState) => ({ ...s, dirty: false });
@@ -29,3 +33,12 @@ export const bufferExtent =
         const extent = e.buffer(n).getArray();
         return dirty({ ...s, extent });
     });
+
+export const zoomToMapExtent =
+    () => dispatch('component/map', (s) => {
+        const extent = getMapExtent();
+        logger('zoomToExtent', extent);
+        return dirty({ ...s, extent });
+    });
+
+logger('loaded');

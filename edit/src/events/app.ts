@@ -54,7 +54,7 @@ const events = {
 
         getconfig('apiUrl')
             .then(apiUrl => fetchGroup(apiUrl)(uid, gid, parse))
-            .then(group => dispatch('data/map', () => group))
+            .then(data => dispatch('data/map', () => data.group))
             .then(() => dispatch('app/mapId', () => gid))
             .then(() => dispatch('app/layerIndex', () => 0))
             .catch(err => logger(`Failed loading ${err}`));

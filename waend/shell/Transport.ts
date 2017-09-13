@@ -94,7 +94,7 @@ function transportXHR() {
     const mkListener: (a: XMLHttpRequest | XMLHttpRequestUpload, b: string, c: EventListener) => void =
         (emitter, eventName, cb) => {
             emitter.addEventListener(eventName, evt => {
-                logger('XHR event', eventName);
+                // logger('XHR event', eventName);
                 cb(evt);
             }, false);
         };
@@ -106,7 +106,7 @@ function transportXHR() {
                 .forEach((k) => {
                     const li = listeners[k];
                     if (li) {
-                        logger('XHR set event handler', k);
+                        // logger('XHR set event handler', k);
                         mkListener(emitter, k, li);
                     }
                 });
@@ -119,7 +119,7 @@ function transportXHR() {
                     .forEach((k) => {
                         const li = listeners[`upload:${k}`];
                         if (li) {
-                            logger('XHR.upload set event handler', k);
+                            // logger('XHR.upload set event handler', k);
                             mkListener(uploadEmitter, k, li);
                         }
                     });
@@ -145,7 +145,7 @@ function transportXHR() {
                         xhr.setRequestHeader(hk, options.headers[hk]);
                     }
                     catch (err) {
-                        logger('transportXHR setHeader', err);
+                        logger('transportXHR:error setHeader', err);
                     }
 
                 });
@@ -219,8 +219,8 @@ export class Transport extends EventEmitter {
                     headers: _.extend({}, getOptions.headers),
                     params: getOptions.params,
                     verb: 'GET',
-                    url: url,
-                    body: null
+                    body: null,
+                    url,
                 };
 
                 transport(options);

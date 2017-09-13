@@ -119,6 +119,7 @@ export const addTexture: (z: string, a: ModelProperties, b: Extent, c: Extent, d
 
 export const getKey: (a: ModelProperties, b: Extent, c: Extent, d: Transform) => [string, boolean] =
     (props, viewport, extent, transform) => {
+        // console.log('texture/getKey', props, viewport, extent, transform);
         const strokeColor = getProperty(props, 'style.strokeStyle', '#000');
         const lineWidth = getProperty(props, 'style.lineWidth', 1);
         const rotation = getProperty(props, 'params.rotation', 0);

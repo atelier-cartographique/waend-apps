@@ -36,7 +36,7 @@ import {
 } from '../lib';
 import Painter from './Painter';
 import { CompQuery, DataQuery } from './index';
-import { getFeatures, getGeoExtent, getTransform } from './queries';
+import { getFeatures, getTransform, getGeoExtent } from './queries';
 
 const logger = debug('waend:map/renderer');
 
@@ -170,26 +170,41 @@ class CanvasRenderer {
             return;
         }
 
-        const worker = this.worker;
-        const extent = getGeoExtent(this.comp());
-        const transform = getTransform(this.comp()).flatMatrix();
+        const ack = _.uniqueId('ack.');
+        this.worker.once(ack,
+            () => {
 
-        if (this.frameId) {
-            worker.post({
-                name: EventCancelFrame,
-                id: this.frameId,
+                const worker = this.worker;
+                logger(this.comp());
+                const extent = getGeoExtent(this.comp());
+                const transform = getTransform(this.comp()).flatMatrix();
+
+                if (this.frameId) {
+                    worker.post({
+                        name: EventCancelFrame,
+                        id: this.frameId,
+                    });
+                }
+
+                this.painter.clear();
+
+                this.frameId = this.getNewFrameId();
+                worker.post({
+                    name: EventRenderFrame,
+                    id: this.frameId,
+                    transform,
+                    extent,
+                })
+
+
             });
-        }
 
-        this.painter.clear();
+        this.worker.post({
+            name: EventRenderInit,
+            models: getFeatures(this.data(), this.layerId),
+            ack,
+        });
 
-        this.frameId = this.getNewFrameId();
-        worker.post({
-            name: EventRenderFrame,
-            id: this.frameId,
-            transform,
-            extent,
-        })
     }
 
     stop() {

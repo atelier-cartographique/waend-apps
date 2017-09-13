@@ -240,8 +240,8 @@ export class Extent {
         );
     }
 
-    add(extent: any) {
-        extent = (extent instanceof Extent) ? extent : new Extent(extent);
+    add(optExtent: any) {
+        const extent = (optExtent instanceof Extent) ? optExtent : new Extent(optExtent);
         this.extent[0] = Math.min(this.extent[0], extent.extent[0]);
         this.extent[1] = Math.min(this.extent[1], extent.extent[1]);
         this.extent[2] = Math.max(this.extent[2], extent.extent[2]);

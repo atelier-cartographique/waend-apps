@@ -113,6 +113,7 @@ export class WaendWorker extends EventEmitter {
                     break;
 
                 case 'frame':
+                    log(`frame ${data.instructions.length}`);
                     this.emit('frame', data.id, data.instructions);
                     break;
             }

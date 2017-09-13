@@ -28,15 +28,24 @@ export const getFeatures =
         return layer.features;
     };
 
-export const getFlatMatrix =
-    (s: MapState) => {
-        return Transform.fromFlatMatrix(s.matrix);
+export const projectedExtent =
+    (extent: Extent) => {
+        const bl = pointProject(
+            extent.getBottomLeft().getCoordinates());
+        const tr = pointProject(
+            extent.getTopRight().getCoordinates());
+        const pr = [bl[0], bl[1], tr[0], tr[1]];
+        return new Extent(pr);
     };
-
 
 export const getExtent =
     (s: MapState) => {
         return (new Extent(s.extent));
+    };
+
+export const getProjectedExtent =
+    (s: MapState) => {
+        return projectedExtent(getExtent(s));
     };
 
 export const getRect =
@@ -47,7 +56,7 @@ export const getRect =
 
 export const getAdjustedExtent =
     (state: MapState) => {
-        const extent = getExtent(state);
+        const extent = getProjectedExtent(state);
         const rect = getRect(state);
         const sx = rect.width / Math.abs(extent.getWidth());
         const sy = rect.height / Math.abs(extent.getHeight());
