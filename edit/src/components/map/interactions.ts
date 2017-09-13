@@ -1,11 +1,13 @@
+import * as debug from 'debug';
 import { DIV } from '../elements';
 import { } from '../keycodes';
 import { zoomToMapExtent, updateInteraction, transformExtent, setExtent } from '../../events/map';
 import { getInteractionState, getState as getMapState } from '../../queries/map';
 import { vecDist } from 'waend/util';
-import { Transform } from 'waend/lib';
+import { Transform, Extent } from 'waend/lib';
 import { getCoordinateFromPixel, getExtent } from 'waend/map/queries';
 
+const logger = debug('waend:comp/map/inteactions')
 
 export interface MapInteractionsState {
     isZooming: boolean;
@@ -37,7 +39,9 @@ const zoomToExtent =
 
 const getMouseEventPos =
     <T>(ev: React.MouseEvent<T>) => {
-        if (ev.nativeEvent instanceof MouseEvent) {
+        const isWheel = ev.nativeEvent instanceof WheelEvent;
+        const isMouse = ev.nativeEvent instanceof MouseEvent;
+        if (isMouse || isWheel) {
             const target = ev.target as Element;
             const trect = target.getBoundingClientRect();
             const node = target.parentElement;
@@ -115,6 +119,43 @@ const onMouseUp =
         }
     };
 
+const getStep =
+    (extent: Extent) => {
+        const width = extent.getWidth();
+        const height = extent.getHeight();
+        const diag = Math.sqrt((width * width) + (height * height));
+
+        return (diag / 20);
+    };
+
+const zoom =
+    (s: number) =>
+        <T>(event: React.WheelEvent<T>) => {
+            const tr = new Transform();
+            const pos = getCoordinateFromPixel(getMapState())(getMouseEventPos(event));
+            const extent = getExtent(getMapState());
+            const val = getStep(extent);
+            tr.scale(s, s, pos);
+            logger(`zoomIn ${-val} ${tr.getScale()}`);
+            transformExtent(tr)(extent.getArray());
+        };
+
+const zoomIn = zoom(.8);
+
+const zoomOut = zoom(1.2);
+
+const onWheel =
+    (event: React.WheelEvent<Element>) => {
+        if (Math.abs(event.deltaY) > 2) {
+            if (event.deltaY < 0) {
+                zoomIn(event);
+            }
+            else {
+                zoomOut(event);
+            }
+        }
+    };
+
 
 const render =
     () => DIV({
@@ -123,6 +164,7 @@ const render =
         onMouseDown,
         onMouseMove,
         onMouseUp,
+        onWheel,
 
     },
         zoomToExtent(),
@@ -130,3 +172,5 @@ const render =
 
 
 export default render;
+
+logger('loaded');
