@@ -3,6 +3,7 @@
 import { User, Group } from 'waend/lib';
 import { ImportState, defaultImportState } from '../components/import';
 import { MapState, defaultMapState } from 'waend/map';
+import { MapInteractionsState, defaultMapInteractionsState } from '../components/map/interactions';
 
 export type AppLayout =
     | 'main'
@@ -27,6 +28,7 @@ export interface IShapeApp {
     // 'component/...': ...
     'component/import': ImportState;
     'component/map': MapState;
+    'component/mapInteractions': MapInteractionsState;
 
     // 'port/...': ...
 }
@@ -52,4 +54,5 @@ export const appShape: IShapeApp = {
     'app/layerIndex': -1,
     'component/import': defaultImportState(),
     'component/map': defaultMapState(),
+    'component/mapInteractions': defaultMapInteractionsState(),
 };

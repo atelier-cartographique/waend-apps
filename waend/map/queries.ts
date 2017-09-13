@@ -130,18 +130,20 @@ export const getViewPointProjected =
 
 
 export const getCoordinateFromPixel =
-    (state: MapState, pixel: number[]) => {
-        const v = [pixel[0], pixel[1]];
-        const inverse = getTransform(state).inverse();
-        const tv = inverse.mapVec2(v);
-        // logger('map.getCoordinateFromPixel', v, inverse.flatMatrix(), tv);
-        return pointUnproject(tv);
-    }
+    (state: MapState) =>
+        (pixel: number[]) => {
+            const v = [pixel[0], pixel[1]];
+            const inverse = getTransform(state).inverse();
+            const tv = inverse.mapVec2(v);
+            // logger('map.getCoordinateFromPixel', v, inverse.flatMatrix(), tv);
+            return pointUnproject(tv);
+        }
 
 export const getPixelFromCoordinate =
-    (state: MapState, coord: number[]) => {
-        const v = [coord[0], coord[1]];
-        const pv = pointProject(v);
-        const tv = getTransform(state).mapVec2(pv);
-        return tv;
-    }
+    (state: MapState) =>
+        (coord: number[]) => {
+            const v = [coord[0], coord[1]];
+            const pv = pointProject(v);
+            const tv = getTransform(state).mapVec2(pv);
+            return tv;
+        }

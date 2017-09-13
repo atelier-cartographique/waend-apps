@@ -82,6 +82,9 @@ export const getMapExtent =
             }, layerExtent(layers[0]))),
     ) as number[];
 
+export const getInteractionState =
+    () => query('component/mapInteractions');
+
+
+
 logger('loaded');
-
-
