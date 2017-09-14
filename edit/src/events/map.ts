@@ -65,6 +65,9 @@ export const updateInteraction =
 
 export const overlayId = 'map-overlay-id';
 
+
+export const makeOverlayClean =
+    () => dispatch('component/mapOverlayState', clean);
 const overlayData = dispatchK('component/mapOverlayData');
 const overlayState = dispatchK('component/mapOverlayState');
 export const resetOverlay =
@@ -77,7 +80,11 @@ export const overlayPlace =
         return s;
     });
 
-observe('component/map', s => overlayState(() => s));
+observe('component/map', s => {
+    if (s.dirty !== 'clean') {
+        overlayState(() => s);
+    }
+});
 // selection
 
 const isIdIn =

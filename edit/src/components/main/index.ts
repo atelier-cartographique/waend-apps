@@ -1,8 +1,9 @@
 import { DIV, H1 } from '../elements';
 import events from '../../events/app';
 import queries from '../../queries/app';
-import { getMapName } from '../../queries/map';
+// import { getMapName } from '../../queries/map';
 import mapViewFunction from '../map';
+import mode from './mode';
 
 
 const renderNew =
@@ -32,23 +33,30 @@ const renderNoMap =
 
 const mapView = mapViewFunction();
 
-const renderMap =
+const renderSelect =
+    () => DIV({}, mode(), mapView());
+
+const renderWithMap =
     () => {
-        return (
-            DIV({},
-                `:: ${getMapName()} ::`,
-                DIV({
-                    onClick: () => events.setMode('base'),
-                }, 'BASE'),
-                DIV({
-                    onClick: () => events.setLayout('import'),
-                }, 'IMPORT'),
-                DIV({
-                    onClick: () => events.setMode('select'),
-                }, 'SELECT'),
-                mapView(),
-            )
-        );
+        switch (queries.getMode()) {
+            case 'base':
+            case 'select': return renderSelect();
+        }
+        // return (
+        //     DIV({},
+        //         `:: ${getMapName()} ::`,
+        //         DIV({
+        //             onClick: () => events.setMode('base'),
+        //         }, 'BASE'),
+        //         DIV({
+        //             onClick: () => events.setLayout('import'),
+        //         }, 'IMPORT'),
+        //         DIV({
+        //             onClick: () => events.setMode('select'),
+        //         }, 'SELECT'),
+        //         mapView(),
+        //     )
+        // );
     };
 
 const render =
@@ -57,7 +65,7 @@ const render =
             queries.getMap()
                 .fold(
                 renderNoMap,
-                renderMap));
+                renderWithMap));
     };
 
 export default render;

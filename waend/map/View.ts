@@ -213,6 +213,7 @@ export default class View {
             .map((layer: any, idx: number) => {
                 let r = findR(layer.id)(this.ddr);
                 if (!r) {
+                    logger(`add layer ${layer.id}`);
                     r = this.addSource(layer);
                 }
                 r.canvas.style.zIndex = (-idx).toString();

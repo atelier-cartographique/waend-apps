@@ -87,7 +87,7 @@ class CanvasRenderer {
                         this.isReady = true;
                         if (this.pendingUpdate) {
                             this.pendingUpdate = false;
-                            this.render();
+                            this.renderFrame();
                         }
                     });
 
@@ -163,10 +163,9 @@ class CanvasRenderer {
     private initAndRender() {
         const ack = _.uniqueId('ack.');
         this.worker.once(ack,
-            () => {
-                this.renderFrame();
-            });
+            () => this.renderFrame());
 
+        logger(`post ack (${ack})`);
         this.worker.post({
             name: EventRenderInit,
             models: getFeatures(this.data(), this.layerId),

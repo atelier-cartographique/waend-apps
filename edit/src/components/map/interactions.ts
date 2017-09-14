@@ -6,7 +6,7 @@ import baseInteraction from './interaction-base';
 import selectInteraction from './interaction-select';
 import queries from '../../queries/app';
 
-const logger = debug('waend:comp/map/inteactions')
+export const logger = debug('waend:comp/map/inteactions')
 
 export interface MapInteractionsState {
     isZooming: boolean;
@@ -57,6 +57,7 @@ const renderSelect =
 
 const render =
     () => {
+        logger(`render ${queries.getMode()}`)
         switch (queries.getMode()) {
             case 'base': return renderBase();
             case 'select': return renderSelect();

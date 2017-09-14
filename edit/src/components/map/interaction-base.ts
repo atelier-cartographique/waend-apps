@@ -1,11 +1,10 @@
-import * as debug from 'debug';
+import { logger } from './interactions';
 import { updateInteraction, transformExtent, setExtent } from '../../events/map';
 import { getInteractionState, getState as getMapState } from '../../queries/map';
 import { vecDist } from 'waend/util';
-import { Transform } from 'waend/lib';
+import { Transform, Extent } from 'waend/lib';
 import { getCoordinateFromPixel, getExtent } from 'waend/map/queries';
 
-const logger = debug('waend:comp/map/base');
 
 export const getMouseEventPos =
     <T>(ev: React.MouseEvent<T>) => {
@@ -54,6 +53,7 @@ export const onMouseMove =
 
 export const onMouseUp =
     (event: React.MouseEvent<Element>) => {
+        logger(`onMouseUp`)
         const { startPoint, isStarted, isPanning } = getInteractionState();
         if (isStarted) {
             const endPoint = getMouseEventPos(event);
@@ -71,7 +71,8 @@ export const onMouseUp =
                     transformExtent(tr)(extent.getArray());
                 }
                 else {
-                    setExtent(startCoordinates.concat(endCoordinates));
+                    setExtent(
+                        (new Extent(startCoordinates.concat(endCoordinates)).normalize().getArray()));
                 }
             }
             // else { /* a missed click? */
@@ -83,7 +84,10 @@ export const onMouseUp =
                 isZooming: false,
                 isMoving: false,
             });
+
+            return dist;
         }
+        return 0;
     };
 
 
@@ -121,4 +125,3 @@ export default {
     onWheel,
 };
 
-logger('loaded');

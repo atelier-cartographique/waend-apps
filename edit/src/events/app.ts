@@ -6,7 +6,7 @@ import { AppLayout, NewState, AppMode } from '../shape';
 import { User, getconfig } from 'waend/lib';
 import { fromNullable } from 'fp-ts/lib/Option';
 import { getBinder, Transport } from 'waend/shell';
-import { markDirty } from './map';
+import { markDirty, zoomToMapExtent } from './map';
 
 
 const logger = debug('waend:events/app');
@@ -62,6 +62,7 @@ const events = {
             .then(data => dispatch('data/map', () => data.group))
             .then(() => dispatch('app/mapId', () => gid))
             .then(() => dispatch('app/layerIndex', () => 0))
+            .then(zoomToMapExtent)
             .then(markDirty)
             .catch(err => logger(`Failed loading ${err}`));
     },
