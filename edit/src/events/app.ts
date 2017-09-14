@@ -2,7 +2,7 @@
 import * as debug from 'debug';
 import { dispatch } from './index';
 import { query } from '../queries';
-import { AppLayout, NewState } from '../shape';
+import { AppLayout, NewState, AppMode } from '../shape';
 import { User, getconfig } from 'waend/lib';
 import { fromNullable } from 'fp-ts/lib/Option';
 import { getBinder, Transport } from 'waend/shell';
@@ -24,6 +24,10 @@ const fetchGroup =
         };
 
 const events = {
+
+    setMode(m: AppMode) {
+        dispatch('app/mode', () => m);
+    },
 
     setLayout(l: AppLayout) {
         dispatch('app/layout', () => l);

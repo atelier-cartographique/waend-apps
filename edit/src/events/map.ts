@@ -1,10 +1,11 @@
 
 import * as debug from 'debug';
-import { dispatch, observe } from './index';
+import { dispatch, dispatchK, observe } from './index';
 import { Extent, Transform } from 'waend/lib';
 import { MapState } from 'waend/map';
-import { getMapExtent } from '../queries/map';
+import { getMapExtent, getDataOption } from '../queries/map';
 import { MapInteractionsOptions } from '../components/map/interactions';
+import { defaultOverlayData } from '../components/map/overlay';
 
 const logger = debug('waend:events/map');
 
@@ -23,7 +24,7 @@ export const markDirtyData =
     () => dispatch('component/map', dirtyData);
 
 
-observe('data/map', markDirty);
+observe('data/map', markDirtyData);
 
 export const setRect =
     (rect: ClientRect) => dispatch('component/map', s => dirtyView({ ...s, rect }));
@@ -58,5 +59,50 @@ export const zoomToMapExtent =
 export const updateInteraction =
     (o: MapInteractionsOptions) =>
         dispatch('component/mapInteractions', s => ({ ...s, ...o }));
+
+
+// overlay
+
+export const overlayId = 'map-overlay-id';
+
+const overlayData = dispatchK('component/mapOverlayData');
+const overlayState = dispatchK('component/mapOverlayState');
+export const resetOverlay =
+    () => overlayData(defaultOverlayData);
+
+export const overlayPlace =
+    (fs: any[]) => overlayData((s) => {
+        s.layers[0].features = fs;
+        logger(`overlayPlace`, s);
+        return s;
+    });
+
+observe('component/map', s => overlayState(() => s));
+// selection
+
+const isIdIn =
+    (base: string[]) =>
+        (id: string) => base.indexOf(id) >= 0;
+
+export const setSelectedUnder =
+    (ids: string[]) => getDataOption().map((g) => {
+        logger(`setSelectedUnder ${ids}`);
+        const isIn = isIdIn(ids);
+        const layers: any[] = g.layers;
+        overlayPlace(layers.reduce<any[]>(
+            (acc, l) => acc.concat(
+                l.features.filter((f: any) => isIn(f.id))), [])
+            .map((f: any) => ({
+                ...f,
+                properties: {
+                    style: {
+                        strokeStyle: 'blue',
+                        strokeWidth: 2,
+                    },
+                },
+            })));
+        overlayState(dirtyData);
+    });
+
 
 logger('loaded');

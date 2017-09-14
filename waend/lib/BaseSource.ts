@@ -31,7 +31,7 @@ interface Index {
     [propName: string]: number;
 }
 
-interface RBushItem extends rbush.BBox {
+export interface RBushItem extends rbush.BBox {
     id: string;
 }
 

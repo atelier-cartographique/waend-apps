@@ -2,7 +2,8 @@
 import * as debug from 'debug';
 import { query } from './index';
 import { fromNullable } from 'fp-ts/lib/Option';
-import { Geometry, Extent } from 'waend/lib';
+import { Geometry, Extent, RBushItem, GeoModel } from 'waend/lib';
+import * as rbush from 'rbush';
 
 const logger = debug('waend:queries/map');
 
@@ -25,8 +26,9 @@ const pathKey =
         };
 
 export const getState = () => query('component/map');
+export const getDataOption = () => fromNullable(query('data/map'))
 export const getData =
-    () => fromNullable(query('data/map')).fold(
+    () => getDataOption().fold(
         () => ({}),
         group => group,
     );
@@ -85,6 +87,45 @@ export const getMapExtent =
 export const getInteractionState =
     () => query('component/mapInteractions');
 
+
+export const getOverlayState = () => query('component/mapOverlayState');
+export const getOverlayDataOption = () => fromNullable(query('component/mapOverlayData'));
+export const getOverlayData =
+    () => getOverlayDataOption().fold(
+        () => ({}),
+        group => group,
+    );
+export const isOverlayDirty =
+    () => query('component/mapOverlayState').dirty !== 'clean';
+
+
+export const getFeaturesIn =
+    (e: Extent) => {
+        const tree = rbush<RBushItem>();
+        const layers: any[] = getData().layers;
+        const features =
+            layers
+                .reduce<any[]>((acc, l) => acc.concat(l.features), [])
+                .map((a: any) => new GeoModel(a));
+        const items: RBushItem[] =
+            features
+                .map((m) => ({
+                    id: m.id,
+                    ...(m.getExtent().getDictionary()),
+                }));
+        tree.load(items);
+
+        return (
+            tree
+                .search(e.getDictionary())
+                .map(i => i.id));
+    };
+
+export const getFeaturesAt =
+    (pos: number[]) => {
+        logger(`getFeaturesAt ${pos}`);
+        return getFeaturesIn(new Extent(pos.concat(pos)));
+    };
 
 
 logger('loaded');

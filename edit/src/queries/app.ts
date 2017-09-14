@@ -9,6 +9,10 @@ const logger = debug('waend:queries/app');
 
 const queries = {
 
+    getMode() {
+        return query('app/mode');
+    },
+
     getArgs() {
         return query('app/args');
     },

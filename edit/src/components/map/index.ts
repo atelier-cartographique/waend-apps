@@ -3,6 +3,7 @@ import { DIV } from '../elements';
 import { getState, getData, checkRect, isDirty } from '../../queries/map';
 import { setRect, markClean } from '../../events/map';
 import interactions from './interactions';
+import overlay from './overlay';
 import wmap from 'waend/map';
 
 const logger = debug('waend:comp/map');
@@ -22,8 +23,7 @@ const renderFn =
     () => {
         const map = wmap(getState, getData);
         const mapKey = `map-view-${un()}`;
-        // const checkSize =
-        //     window.addEventListener('resize', )
+        const overlayInst = overlay();
 
         const render =
             () => {
@@ -57,6 +57,7 @@ const renderFn =
                                 }
                             },
                         }),
+                        overlayInst(),
                         interactions()))
                     ;
             };

@@ -4,6 +4,7 @@ import { User, Group } from 'waend/lib';
 import { ImportState, defaultImportState } from '../components/import';
 import { MapState, defaultMapState } from 'waend/map';
 import { MapInteractionsState, defaultMapInteractionsState } from '../components/map/interactions';
+import { defaultOverlayData } from '../components/map/overlay';
 
 export type AppLayout =
     | 'main'
@@ -12,6 +13,11 @@ export type AppLayout =
 
 
 export type NewState = 'initial' | 'processing' | 'done' | 'failed' | null;
+
+export type AppMode =
+    | 'base'
+    | 'select'
+    ;
 
 // State Interface
 
@@ -24,10 +30,14 @@ export interface IShapeApp {
     'app/mapId': string | null;
     'app/new': NewState;
     'app/layerIndex': number;
+    'app/mode': AppMode;
+
 
     // 'component/...': ...
     'component/import': ImportState;
     'component/map': MapState;
+    'component/mapOverlayData': any;
+    'component/mapOverlayState': MapState;
     'component/mapInteractions': MapInteractionsState;
 
     // 'port/...': ...
@@ -45,7 +55,8 @@ export type IShape = IShapeApp & IShapeData;
 // Initial Application State 
 
 export const appShape: IShapeApp = {
-    'app/title': 'dashboard',
+    'app/mode': 'base',
+    'app/title': 'edit',
     'app/user': null,
     'app/layout': 'main',
     'app/args': [],
@@ -55,4 +66,6 @@ export const appShape: IShapeApp = {
     'component/import': defaultImportState(),
     'component/map': defaultMapState(),
     'component/mapInteractions': defaultMapInteractionsState(),
+    'component/mapOverlayData': defaultOverlayData(),
+    'component/mapOverlayState': defaultMapState(),
 };

@@ -38,8 +38,14 @@ const renderMap =
             DIV({},
                 `:: ${getMapName()} ::`,
                 DIV({
+                    onClick: () => events.setMode('base'),
+                }, 'BASE'),
+                DIV({
                     onClick: () => events.setLayout('import'),
                 }, 'IMPORT'),
+                DIV({
+                    onClick: () => events.setMode('select'),
+                }, 'SELECT'),
                 mapView(),
             )
         );
