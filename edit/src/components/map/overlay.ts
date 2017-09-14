@@ -9,13 +9,17 @@ import { getRect } from 'waend/map/queries';
 
 const logger = debug('waend:comp/map/overlay')
 
-export const defaultOverlayData = () => ({
-    layers: [{
-        id: overlayId,
-        features: [],
-    }],
-});
+export const overlayData =
+    (features: any[]) => ({
+        layers: [{
+            id: overlayId,
+            features,
+        }],
+    });
 
+
+export const defaultOverlayData =
+    () => overlayData([]);
 
 const render =
     () => {

@@ -4,6 +4,7 @@ import queries from '../../queries/app';
 // import { getMapName } from '../../queries/map';
 import mapViewFunction from '../map';
 import mode from './mode';
+import select from '../select';
 
 
 const renderNew =
@@ -34,7 +35,7 @@ const renderNoMap =
 const mapView = mapViewFunction();
 
 const renderSelect =
-    () => DIV({}, mode(), mapView());
+    () => DIV({}, mode(), mapView(), select());
 
 const renderWithMap =
     () => {

@@ -114,4 +114,26 @@ export const setSelectedUnder =
     });
 
 
+export const addToSelection =
+    (id: string) => {
+        dispatch('component/mapInteractions',
+            s => ({ ...s, selection: s.selection.concat([id]) }));
+        dispatch('component/mapOverlayState', dirtyData);
+    };
+
+export const removeFromSelection =
+    (id: string) => {
+        dispatch('component/mapInteractions',
+            s => ({ ...s, selection: s.selection.filter(i => i !== id) }));
+        dispatch('component/mapOverlayState', dirtyData);
+    };
+
+export const resetSelection =
+    () => {
+        dispatch('component/mapInteractions',
+            s => ({ ...s, selection: [] }));
+        dispatch('component/mapOverlayState', dirtyData);
+    };
+
+
 logger('loaded');

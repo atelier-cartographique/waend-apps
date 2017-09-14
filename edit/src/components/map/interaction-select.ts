@@ -7,7 +7,7 @@ import {
     onWheel,
 } from './interaction-base';
 import { getFeaturesAt, getState, getSelectedUnder } from '../../queries/map';
-import { setSelectedUnder } from '../../events/map';
+import { setSelectedUnder, resetSelection } from '../../events/map';
 import { getCoordinateFromPixel } from 'waend/map/queries';
 
 
@@ -26,6 +26,7 @@ const onMouseUp =
                 setSelectedUnder(sel.concat(ids));
             }
             else {
+                resetSelection();
                 setSelectedUnder(ids);
             }
         }
