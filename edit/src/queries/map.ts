@@ -40,7 +40,7 @@ export const getMapName =
     );
 
 export const isDirty =
-    () => query('component/map').dirty;
+    () => query('component/map').dirty !== 'clean';
 
 export const checkRect =
     (r: ClientRect) => {

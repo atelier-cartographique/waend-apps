@@ -4,8 +4,9 @@ import { dispatch } from './index';
 import { query } from '../queries';
 import { AppLayout, NewState } from '../shape';
 import { User, getconfig } from 'waend/lib';
-import { fromNullable } from "fp-ts/lib/Option";
-import { getBinder, Transport } from "waend/shell";
+import { fromNullable } from 'fp-ts/lib/Option';
+import { getBinder, Transport } from 'waend/shell';
+import { markDirty } from './map';
 
 
 const logger = debug('waend:events/app');
@@ -20,7 +21,7 @@ const fetchGroup =
                     parse,
                 })
             );
-        }
+        };
 
 const events = {
 
@@ -57,6 +58,7 @@ const events = {
             .then(data => dispatch('data/map', () => data.group))
             .then(() => dispatch('app/mapId', () => gid))
             .then(() => dispatch('app/layerIndex', () => 0))
+            .then(markDirty)
             .catch(err => logger(`Failed loading ${err}`));
     },
 

@@ -192,8 +192,9 @@ class Painter {
 
     startTexture(tid: string) {
         const canvas = document.createElement('canvas');
-        canvas.width = this.context.canvas.width;
-        canvas.height = this.context.canvas.height;
+        const rect = getRect(this.comp());
+        canvas.width = rect.width;
+        canvas.height = rect.height;
         const ctx = canvas.getContext('2d');
         if (ctx) {
             this.textures[tid] = {

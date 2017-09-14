@@ -160,6 +160,44 @@ class CanvasRenderer {
     //     painter.restore();
     // }
 
+    private initAndRender() {
+        const ack = _.uniqueId('ack.');
+        this.worker.once(ack,
+            () => {
+                this.renderFrame();
+            });
+
+        this.worker.post({
+            name: EventRenderInit,
+            models: getFeatures(this.data(), this.layerId),
+            ack,
+        });
+    }
+
+    private renderFrame() {
+        logger(this.comp());
+        const worker = this.worker;
+        const extent = getGeoExtent(this.comp());
+        const transform = getTransform(this.comp()).flatMatrix();
+
+        if (this.frameId) {
+            worker.post({
+                name: EventCancelFrame,
+                id: this.frameId,
+            });
+        }
+
+        this.painter.clear();
+
+        this.frameId = this.getNewFrameId();
+        worker.post({
+            name: EventRenderFrame,
+            id: this.frameId,
+            transform,
+            extent,
+        });
+    }
+
     render() {
         if (!this.isVisible()) {
             this.painter.clear();
@@ -169,41 +207,13 @@ class CanvasRenderer {
             this.pendingUpdate = true;
             return;
         }
+        const dirt = this.comp().dirty;
+        switch (dirt) {
+            case 'all':
+            case 'data': return this.initAndRender();
+            case 'view': return this.renderFrame();
+        }
 
-        const ack = _.uniqueId('ack.');
-        this.worker.once(ack,
-            () => {
-
-                const worker = this.worker;
-                logger(this.comp());
-                const extent = getGeoExtent(this.comp());
-                const transform = getTransform(this.comp()).flatMatrix();
-
-                if (this.frameId) {
-                    worker.post({
-                        name: EventCancelFrame,
-                        id: this.frameId,
-                    });
-                }
-
-                this.painter.clear();
-
-                this.frameId = this.getNewFrameId();
-                worker.post({
-                    name: EventRenderFrame,
-                    id: this.frameId,
-                    transform,
-                    extent,
-                })
-
-
-            });
-
-        this.worker.post({
-            name: EventRenderInit,
-            models: getFeatures(this.data(), this.layerId),
-            ack,
-        });
 
     }
 

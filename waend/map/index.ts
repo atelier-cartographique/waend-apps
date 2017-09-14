@@ -37,17 +37,19 @@ import WaendMap from './WaendMap';
 //     return (new WaendMap({ root, defaultProgramUrl, mediaUrl, projection }));
 // } 
 
+export type MapDirt = 'all' | 'view' | 'data' | 'clean';
+
 export interface MapState {
-    dirty: boolean;
+    dirty: MapDirt;
     defaultProgramUrl: string | null;
     mediaUrl: string | null;
     extent: number[];
     rect: ClientRect;
-};
+}
 
 export const defaultMapState =
     (): MapState => ({
-        dirty: false,
+        dirty: 'clean',
         defaultProgramUrl: null,
         mediaUrl: null,
         extent: [],

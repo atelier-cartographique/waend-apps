@@ -85,7 +85,13 @@ export default class View {
     }
 
     render() {
+        const rect = getRect(this.comp());
         this.reorderLayers()
+            .map((r) => {
+                r.canvas.width = rect.width;
+                r.canvas.height = rect.height;
+                return r;
+            })
             .forEach(r => r.renderer.render());
     }
 
