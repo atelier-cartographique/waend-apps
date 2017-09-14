@@ -108,6 +108,8 @@ export const setSelectedUnder =
                     },
                 },
             })));
+        dispatch('component/mapInteractions',
+            s => ({ ...s, selectedUnder: ids }));
         overlayState(dirtyData);
     });
 

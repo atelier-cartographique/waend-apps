@@ -6,7 +6,7 @@ import {
     onMouseUp as baseMouseUp,
     onWheel,
 } from './interaction-base';
-import { getFeaturesAt, getState } from '../../queries/map';
+import { getFeaturesAt, getState, getSelectedUnder } from '../../queries/map';
 import { setSelectedUnder } from '../../events/map';
 import { getCoordinateFromPixel } from 'waend/map/queries';
 
@@ -20,7 +20,14 @@ const onMouseUp =
         if (dist < 4) {
             const pos = getMouseEventPos(event);
             const ids = getFeaturesAt(getCoordinateFromPixel(getState())(pos));
-            setSelectedUnder(ids);
+            if (event.shiftKey) {
+                const sel = getSelectedUnder();
+                logger(sel, ids);
+                setSelectedUnder(sel.concat(ids));
+            }
+            else {
+                setSelectedUnder(ids);
+            }
         }
     };
 

@@ -127,5 +127,8 @@ export const getFeaturesAt =
         return getFeaturesIn(new Extent(pos.concat(pos)));
     };
 
+export const getSelectedUnder =
+    () => query('component/mapInteractions').selectedUnder;
+
 
 logger('loaded');
