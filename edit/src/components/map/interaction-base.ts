@@ -1,8 +1,11 @@
+import * as debug from 'debug';
 import { updateInteraction, transformExtent, setExtent } from '../../events/map';
 import { getInteractionState, getState as getMapState } from '../../queries/map';
 import { vecDist } from 'waend/util';
 import { Transform } from 'waend/lib';
 import { getCoordinateFromPixel, getExtent } from 'waend/map/queries';
+
+const logger = debug('waend:comp/map/base');
 
 export const getMouseEventPos =
     <T>(ev: React.MouseEvent<T>) => {
@@ -11,14 +14,11 @@ export const getMouseEventPos =
         if (isMouse || isWheel) {
             const target = ev.target as Element;
             const trect = target.getBoundingClientRect();
-            const node = target.parentElement;
-            if (node) {
-                const nrect = node.getBoundingClientRect();
-                return [
-                    ev.clientX - (nrect.left - trect.left),
-                    ev.clientY - (nrect.top - trect.top)
-                ];
-            }
+            return [
+                ev.clientX - trect.left,
+                ev.clientY - trect.top,
+            ];
+
         }
         return [0, 0];
     }
@@ -120,3 +120,5 @@ export default {
     onMouseUp,
     onWheel,
 };
+
+logger('loaded');
