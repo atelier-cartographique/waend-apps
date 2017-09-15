@@ -6,7 +6,8 @@ import { AppLayout, NewState, AppMode } from '../shape';
 import { User, getconfig } from 'waend/lib';
 import { fromNullable } from 'fp-ts/lib/Option';
 import { getBinder, Transport } from 'waend/shell';
-import { markDirty, zoomToMapExtent } from './map';
+import { markDirty, zoomToMapExtent, markDirtyData } from './map';
+import { getDataOption } from '../queries/map';
 
 
 const logger = debug('waend:events/app');
@@ -22,6 +23,10 @@ const fetchGroup =
                 })
             );
         };
+
+const idid =
+    (id: string) =>
+        (a: any) => a.id === id;
 
 const events = {
 
@@ -71,7 +76,7 @@ const events = {
         fromNullable(query('data/user'))
             .map((user) => {
                 const uid = user.id;
-                dispatch('app/new', () => <NewState>'processing');
+                dispatch('app/new', () => 'processing' as NewState);
                 getBinder()
                     .setGroup(uid, {
                         status_flag: 0,
@@ -93,6 +98,44 @@ const events = {
                         dispatch('app/new', () => <NewState>'done');
                     })
                     .catch(() => dispatch('app/new', () => <NewState>'failed'));
+            });
+    },
+
+
+    updateFeature(feature: any) {
+        fromNullable(query('data/user'))
+            .map((user) => {
+                getDataOption()
+                    .map((g) => {
+                        const uid: string = user.id;
+                        const gid: string = g.id;
+                        const lid: string | null = g.layers.reduce((acc: string | null, l: any) => {
+                            if (l.features.find(idid(feature.id))) {
+                                return l.id;
+                            }
+                            return acc;
+                        }, null);
+                        if (lid) {
+                            getBinder()
+                                .setFeature(uid, gid, lid, {
+                                    user_id: uid,
+                                    layer_id: lid,
+                                    geom: feature.geom,
+                                    properties: feature.properties,
+                                }, false)
+                                .then(() => {
+                                    dispatch('data/map', (m) => {
+                                        return fromNullable(m.layers.find(idid(lid)))
+                                            .map((l: any) => fromNullable(l.features.findIndex(idid(feature.id))).map((idx: number) => {
+                                                l.features[idx] = feature;
+                                            }))
+                                            .fold(() => m, () => m);
+                                    });
+                                })
+                                .then(markDirtyData)
+                                .catch(err => logger(`updateFeature error ${err}`));
+                        }
+                    });
             });
     },
 };

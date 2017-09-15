@@ -19,6 +19,10 @@ export type AppMode =
     | 'select'
     ;
 
+export interface InputState {
+    [key: string]: string | number;
+}
+
 // State Interface
 
 
@@ -39,6 +43,7 @@ export interface IShapeApp {
     'component/mapOverlayData': any;
     'component/mapOverlayState': MapState;
     'component/mapInteractions': MapInteractionsState;
+    'component/input': InputState;
 
     // 'port/...': ...
 }
@@ -68,4 +73,5 @@ export const appShape: IShapeApp = {
     'component/mapInteractions': defaultMapInteractionsState(),
     'component/mapOverlayData': defaultOverlayData(),
     'component/mapOverlayState': defaultMapState(),
+    'component/input': {},
 };

@@ -34,7 +34,7 @@ export const getData =
         group => group,
     );
 
-const getGroupName = pathKey('group.properties.name', 'UnNamed');
+const getGroupName = pathKey('properties.name', 'UnNamed');
 
 export const getMapName =
     () => fromNullable(query('data/map')).fold(
@@ -169,6 +169,7 @@ export const getFeatureById =
             .map(ls => ls.reduce(
                 (_acc, l) => l.features.find((f: any) => f.id === id), null))
             .fold(() => none, a => fromNullable(a));
+
 
 
 export const isFeatureSelected =
