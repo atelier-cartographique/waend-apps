@@ -1,17 +1,31 @@
 import * as debug from 'debug';
 import { DIV, INPUT, BUTTON } from '../elements';
 import {
-    getFeatureById,
     getSelectedUnder,
     isFeatureSelected,
-} from '../../queries/map';
+} from '../../queries/select';
 import { getInputValue } from '../../queries/input';
 import { setInputValue } from '../../events/input';
 import events from '../../events/app';
 import { fromPredicate } from 'fp-ts/lib/Option';
-import { addToSelection, removeFromSelection } from '../../events/map';
+import {
+    addToSelection,
+    removeFromSelection,
+} from '../../events/select';
+import { getFeatureById } from '../../queries/map';
 
 const logger = debug('waend:comp/select');
+
+export interface SelectState {
+    selectedUnder: string[];
+    selection: string[];
+}
+
+export const defaultSelectState =
+    (): SelectState => ({
+        selectedUnder: [],
+        selection: [],
+    });
 
 const renderItemDetail =
     (selected: boolean) =>

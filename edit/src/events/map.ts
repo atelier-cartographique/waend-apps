@@ -3,9 +3,8 @@ import * as debug from 'debug';
 import { dispatch, dispatchK, observe } from './index';
 import { Extent, Transform } from 'waend/lib';
 import { MapState } from 'waend/map';
-import { getMapExtent, getDataOption } from '../queries/map';
+import { getMapExtent } from '../queries/map';
 import { MapInteractionsOptions } from '../components/map/interactions';
-import { defaultOverlayData } from '../components/map/overlay';
 
 const logger = debug('waend:events/map');
 
@@ -65,75 +64,20 @@ export const updateInteraction =
 
 export const overlayId = 'map-overlay-id';
 
-
+const overlayState =
+    dispatchK('component/mapOverlayState');
 export const makeOverlayClean =
-    () => dispatch('component/mapOverlayState', clean);
-const overlayData = dispatchK('component/mapOverlayData');
-const overlayState = dispatchK('component/mapOverlayState');
-export const resetOverlay =
-    () => overlayData(defaultOverlayData);
+    () => overlayState(clean);
+export const makeOverlayDirty =
+    () => overlayState(dirty);
 
-export const overlayPlace =
-    (fs: any[]) => overlayData((s) => {
-        s.layers[0].features = fs;
-        logger(`overlayPlace`, s);
-        return s;
-    });
+
 
 observe('component/map', s => {
     if (s.dirty !== 'clean') {
         overlayState(() => s);
     }
 });
-// selection
-
-const isIdIn =
-    (base: string[]) =>
-        (id: string) => base.indexOf(id) >= 0;
-
-export const setSelectedUnder =
-    (ids: string[]) => getDataOption().map((g) => {
-        logger(`setSelectedUnder ${ids}`);
-        const isIn = isIdIn(ids);
-        const layers: any[] = g.layers;
-        overlayPlace(layers.reduce<any[]>(
-            (acc, l) => acc.concat(
-                l.features.filter((f: any) => isIn(f.id))), [])
-            .map((f: any) => ({
-                ...f,
-                properties: {
-                    style: {
-                        strokeStyle: 'blue',
-                        strokeWidth: 2,
-                    },
-                },
-            })));
-        dispatch('component/mapInteractions',
-            s => ({ ...s, selectedUnder: ids }));
-        overlayState(dirtyData);
-    });
-
-
-export const addToSelection =
-    (id: string) => {
-        dispatch('component/mapInteractions',
-            s => ({ ...s, selection: s.selection.concat([id]) }));
-        dispatch('component/mapOverlayState', dirtyData);
-    };
-
-export const removeFromSelection =
-    (id: string) => {
-        dispatch('component/mapInteractions',
-            s => ({ ...s, selection: s.selection.filter(i => i !== id) }));
-        dispatch('component/mapOverlayState', dirtyData);
-    };
-
-export const resetSelection =
-    () => {
-        dispatch('component/mapInteractions',
-            s => ({ ...s, selection: [] }));
-        dispatch('component/mapOverlayState', dirtyData);
-    };
 
 
 logger('loaded');

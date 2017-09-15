@@ -1,13 +1,15 @@
 
 import * as debug from 'debug';
 import { CANVAS } from '../elements';
-import { getOverlayData, getOverlayState, isOverlayDirty } from '../../queries/map';
+import queries from '../../queries/app';
+import { getOverlayState, isOverlayDirty } from '../../queries/map';
 import { overlayId, makeOverlayClean } from '../../events/map';
 import Renderer from 'waend/map/Renderer';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { getRect } from 'waend/map/queries';
+import { getSelectionGroup } from '../../queries/select';
 
-const logger = debug('waend:comp/map/overlay')
+const logger = debug('waend:comp/map/overlay');
 
 export const overlayData =
     (features: any[]) => ({
@@ -17,9 +19,14 @@ export const overlayData =
         }],
     });
 
-
-export const defaultOverlayData =
-    () => overlayData([]);
+const getData =
+    () => {
+        const mode = queries.getMode();
+        switch (mode) {
+            case 'base': return overlayData([]);
+            case 'select': return getSelectionGroup();
+        }
+    };
 
 const render =
     () => {
@@ -38,7 +45,12 @@ const render =
             if (node) {
                 const ctx = node.getContext('2d');
                 if (ctx) {
-                    r = some(new Renderer(getOverlayState, getOverlayData, overlayId, ctx));
+                    r = some(new Renderer(
+                        getOverlayState,
+                        getData,
+                        overlayId,
+                        ctx,
+                    ));
                 }
                 renderOverlay();
             }
@@ -57,7 +69,7 @@ const render =
                     height: rect.height,
                     ref: attach,
                 }));
-        }
+        };
     };
 
 export default render;

@@ -4,7 +4,6 @@ import { query } from './index';
 import { fromNullable, none } from 'fp-ts/lib/Option';
 import { Geometry, Extent, RBushItem, GeoModel } from 'waend/lib';
 import * as rbush from 'rbush';
-import { overlayData } from '../components/map/overlay';
 
 const logger = debug('waend:queries/map');
 
@@ -89,37 +88,9 @@ export const getInteractionState =
     () => query('component/mapInteractions');
 
 
-export const getOverlayState = () => query('component/mapOverlayState');
-export const getOverlayDataOption = () => fromNullable(query('component/mapOverlayData'));
-export const getOverlayData =
-    () => getOverlayDataOption().fold(
-        () => ({}),
-        (group: any) => overlayData(
-            group.layers[0].features.map((f: any) => {
-                if (isFeatureSelected(f.id)) {
-                    logger(`SELECTED ${f.id}`, f)
-                    return {
-                        ...f,
-                        properties: {
-                            style: {
-                                strokeStyle: 'red',
-                                strokeWidth: 3,
-                            },
-                        },
-                    };
-                }
-                return {
-                    ...f,
-                    properties: {
-                        style: {
-                            strokeStyle: 'blue',
-                            strokeWidth: 1,
-                        },
-                    },
+export const getOverlayState =
+    () => query('component/mapOverlayState');
 
-                }
-            })),
-    );
 export const isOverlayDirty =
     () => query('component/mapOverlayState').dirty !== 'clean';
 
@@ -152,15 +123,6 @@ export const getFeaturesAt =
         return getFeaturesIn(new Extent(pos.concat(pos)));
     };
 
-const isIdIn =
-    (base: string[]) =>
-        (id: string) => base.indexOf(id) >= 0;
-
-export const getSelectedUnder =
-    () => query('component/mapInteractions').selectedUnder;
-
-export const getSelection =
-    () => query('component/mapInteractions').selection;
 
 export const getFeatureById =
     (id: string) =>
@@ -172,7 +134,5 @@ export const getFeatureById =
 
 
 
-export const isFeatureSelected =
-    (id: string) => isIdIn(query('component/mapInteractions').selection)(id);
 
 logger('loaded');

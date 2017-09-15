@@ -6,8 +6,9 @@ import {
     onMouseUp as baseMouseUp,
     onWheel,
 } from './interaction-base';
-import { getFeaturesAt, getState, getSelectedUnder } from '../../queries/map';
-import { setSelectedUnder, resetSelection } from '../../events/map';
+import { getFeaturesAt, getState } from '../../queries/map';
+import { getSelectedUnder } from '../../queries/select';
+import { setSelectedUnder, resetSelection } from '../../events/select';
 import { getCoordinateFromPixel } from 'waend/map/queries';
 
 

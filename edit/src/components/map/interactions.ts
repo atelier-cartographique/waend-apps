@@ -14,8 +14,6 @@ export interface MapInteractionsState {
     isPanning: boolean;
     isStarted: boolean;
     startPoint: number[];
-    selectedUnder: string[];
-    selection: string[];
 }
 
 export type MapInteractionsOptions = Partial<MapInteractionsState>;
@@ -27,8 +25,6 @@ export const defaultMapInteractionsState =
         isPanning: false,
         isStarted: false,
         startPoint: [0, 0],
-        selectedUnder: [],
-        selection: [],
     });
 
 const zoomToExtent =
