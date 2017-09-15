@@ -2,34 +2,35 @@
 
 .edit {
     .mode {
+        .absolute(0,0, initial,30vw);
+        z-index: 1000;
         span {
             cursor: pointer;
             padding-right: 1em;
         }
     }
+
+    .sidebar {
+        .absolute(0, 70vw, 0, 0);
+        border-right: 1px solid #000;
+        padding: @margin;
+        overflow-y: auto;
+    }
     .map {
-        position: relative;
-        width: 600px;
-        height: 600px;
+        .absolute(0, 0, 0, 30vw);
 
         .map-view{
-            position: absolute;
-            width:100%;
-            height: 100%;
+            .absolute(0,0,0,0);
             z-index: 0;
-            background-color: #B2FF97;
+            // background-color: #B2FF97;
         }
         .map-overlay{
-            position: absolute;
-            width:100%;
-            height: 100%;
+            .absolute(0,0,0,0);
             z-index: 10;
             background-color:transparent;
         }
         .map-interactions{
-            position: absolute;
-            width:100%;
-            height: 100%;
+            .absolute(0,0,0,0);
             z-index: 100;
             background-color:transparent;
 
