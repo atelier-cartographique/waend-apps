@@ -2,15 +2,24 @@
 
 .edit {
     .mode {
+        .absolute(0,0, initial,30vw);
+        z-index: 1000;
         span {
             cursor: pointer;
             padding-right: 1em;
         }
     }
+
+    .sidebar {
+        .absolute(0, 70vw, 0, 0);
+        padding: @margin;
+        overflow-y: auto;
+    }
     .map {
-        position: relative;
-        width: 600px;
-        height: 600px;
+        .absolute(0, 0, 0, 30vw);
+        // position: relative;
+        // width: 600px;
+        // height: 600px;
 
         .map-view{
             position: absolute;
