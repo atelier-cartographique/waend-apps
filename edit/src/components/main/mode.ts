@@ -4,6 +4,13 @@ import queries from '../../queries/app';
 import { AppMode } from '../../shape';
 import { fromPredicate } from 'fp-ts/lib/Option';
 
+const importMode = SPAN({
+    onClick: () => {
+        events.setMode('base');
+        events.setLayout('import');
+    }
+}, 'import');
+
 const renderMode =
     (m: AppMode) =>
         fromPredicate(pm => pm === m)(queries.getMode())
@@ -19,7 +26,8 @@ const renderMode =
 const modes =
     () => ['base', 'select', 'trace'].map(renderMode);
 
+
 const render =
-    () => DIV({ className: 'mode' }, ...modes());
+    () => DIV({ className: 'mode' }, ...modes(), importMode);
 
 export default render;
