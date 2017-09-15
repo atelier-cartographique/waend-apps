@@ -25,21 +25,21 @@ export const isFeatureSelected =
 interface StyleOnlyProps {
     style: {
         strokeStyle: string;
-        strokeWidth: number;
+        lineWidth: number;
     };
 }
 
 const underProps: StyleOnlyProps = {
     style: {
-        strokeStyle: 'red',
-        strokeWidth: 3,
+        strokeStyle: 'blue',
+        lineWidth: 1,
     },
 };
 
 const selectProps: StyleOnlyProps = {
     style: {
-        strokeStyle: 'blue',
-        strokeWidth: 3,
+        strokeStyle: 'red',
+        lineWidth: 2,
     },
 };
 

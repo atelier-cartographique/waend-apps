@@ -1,5 +1,5 @@
 import { dispatchK } from './index';
-import { makeOverlayDirty } from './map';
+import { markOverlayDirty } from './map';
 
 // selection
 const select = dispatchK('component/select');
@@ -8,26 +8,26 @@ const select = dispatchK('component/select');
 export const setSelectedUnder =
     (ids: string[]) => {
         select(s => ({ ...s, selectedUnder: ids }));
-        makeOverlayDirty();
+        markOverlayDirty();
     };
 
 
 export const addToSelection =
     (id: string) => {
         select(s => ({ ...s, selection: s.selection.concat([id]) }));
-        makeOverlayDirty();
+        markOverlayDirty();
     };
 
 
 export const removeFromSelection =
     (id: string) => {
         select(s => ({ ...s, selection: s.selection.filter(i => i !== id) }));
-        makeOverlayDirty();
+        markOverlayDirty();
     };
 
 
 export const resetSelection =
     () => {
         select(s => ({ ...s, selection: [] }));
-        makeOverlayDirty();
+        markOverlayDirty();
     };

@@ -5,6 +5,7 @@ import queries from '../../queries/app';
 import mapViewFunction from '../map';
 import mode from './mode';
 import select from '../select';
+import trace from '../trace';
 
 
 const renderNew =
@@ -36,12 +37,15 @@ const mapView = mapViewFunction();
 
 const renderSelect =
     () => DIV({}, mode(), mapView(), select());
+const renderTrace =
+    () => DIV({}, mode(), mapView(), trace());
 
 const renderWithMap =
     () => {
         switch (queries.getMode()) {
             case 'base':
             case 'select': return renderSelect();
+            case 'trace': return renderTrace();
         }
         // return (
         //     DIV({},

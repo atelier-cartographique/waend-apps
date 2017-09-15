@@ -3,11 +3,12 @@ import * as debug from 'debug';
 import { CANVAS } from '../elements';
 import queries from '../../queries/app';
 import { getOverlayState, isOverlayDirty } from '../../queries/map';
-import { overlayId, makeOverlayClean } from '../../events/map';
+import { overlayId, markOverlayClean } from '../../events/map';
 import Renderer from 'waend/map/Renderer';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { getRect } from 'waend/map/queries';
 import { getSelectionGroup } from '../../queries/select';
+import { getTraceGroup } from '../../queries/trace';
 
 const logger = debug('waend:comp/map/overlay');
 
@@ -25,6 +26,7 @@ const getData =
         switch (mode) {
             case 'base': return overlayData([]);
             case 'select': return getSelectionGroup();
+            case 'trace': return getTraceGroup();
         }
     };
 
@@ -37,7 +39,7 @@ const render =
                 if (isOverlayDirty()) {
                     logger(`renderOverlay`);
                     renderer.render();
-                    makeOverlayClean();
+                    markOverlayClean();
                 }
             });
 

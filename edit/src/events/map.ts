@@ -66,9 +66,9 @@ export const overlayId = 'map-overlay-id';
 
 const overlayState =
     dispatchK('component/mapOverlayState');
-export const makeOverlayClean =
+export const markOverlayClean =
     () => overlayState(clean);
-export const makeOverlayDirty =
+export const markOverlayDirty =
     () => overlayState(dirty);
 
 

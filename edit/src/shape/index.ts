@@ -5,6 +5,7 @@ import { ImportState, defaultImportState } from '../components/import';
 import { MapState, defaultMapState } from 'waend/map';
 import { MapInteractionsState, defaultMapInteractionsState } from '../components/map/interactions';
 import { SelectState, defaultSelectState } from '../components/select';
+import { TraceState, defaultTraceState } from '../components/trace';
 
 export type AppLayout =
     | 'main'
@@ -17,6 +18,7 @@ export type NewState = 'initial' | 'processing' | 'done' | 'failed' | null;
 export type AppMode =
     | 'base'
     | 'select'
+    | 'trace'
     ;
 
 export interface InputState {
@@ -44,6 +46,7 @@ export interface IShapeApp {
     'component/mapInteractions': MapInteractionsState;
     'component/mapOverlayState': MapState;
     'component/select': SelectState;
+    'component/trace': TraceState;
 
     // 'port/...': ...
 }
@@ -74,4 +77,5 @@ export const appShape: IShapeApp = {
     'component/mapInteractions': defaultMapInteractionsState(),
     'component/mapOverlayState': defaultMapState(),
     'component/select': defaultSelectState(),
+    'component/trace': defaultTraceState(),
 };

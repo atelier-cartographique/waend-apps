@@ -17,7 +17,7 @@ const renderMode =
         );
 
 const modes =
-    () => ['base', 'select'].map(renderMode);
+    () => ['base', 'select', 'trace'].map(renderMode);
 
 const render =
     () => DIV({ className: 'mode' }, ...modes());
