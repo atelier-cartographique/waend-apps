@@ -35,10 +35,15 @@ const renderNoMap =
 
 const mapView = mapViewFunction();
 
+const sidebar =
+(child:React.ReactNode) => DIV({
+    className:'sidebar',
+}, child);
+
 const renderSelect =
-    () => DIV({}, mode(), mapView(), select());
+    () => DIV({}, mode(), mapView(), sidebar(select()));
 const renderTrace =
-    () => DIV({}, mode(), mapView(), trace());
+    () => DIV({}, mode(), mapView(), sidebar(trace()));
 
 const renderWithMap =
     () => {
