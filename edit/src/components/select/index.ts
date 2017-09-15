@@ -30,7 +30,7 @@ export const defaultSelectState =
 const renderItemDetail =
     (selected: boolean) =>
         (id: string, name: string) => {
-
+            const checked = selected ? 'btn-feature-select checked' : 'btn-feature-select unchecked';
             const setName =
                 () =>
                     getFeatureById(id)
@@ -51,11 +51,10 @@ const renderItemDetail =
             if (name === id) {
                 return (
                     DIV({ key: id },
-                        INPUT({
-                            type: 'checkbox',
-                            checked: selected,
+                        BUTTON({
                             onClick: action,
-                        }),
+                            className: checked,
+                        }, '•'),
                         INPUT({
                             type: 'text',
                             placeholder: id,
@@ -66,10 +65,9 @@ const renderItemDetail =
             }
             return (
                 DIV({ key: id },
-                    INPUT({
-                        type: 'checkbox',
-                        checked: selected,
+                    BUTTON({
                         onClick: action,
+                        className: checked,
                     }),
                     INPUT({
                         type: 'text',
