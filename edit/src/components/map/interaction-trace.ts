@@ -7,7 +7,12 @@ import {
     onWheel,
 } from './interaction-base';
 import { getState } from '../../queries/map';
-import { pushPosition } from '../../events/trace';
+import { getMode } from '../../queries/trace';
+import {
+    pushPosition,
+    deletePosition,
+    insertPosition,
+} from '../../events/trace';
 import { getCoordinateFromPixel } from 'waend/map/queries';
 
 
@@ -18,7 +23,12 @@ const onMouseUp =
         const dist = baseMouseUp(event);
         if (dist < 4) {
             const pos = getCoordinateFromPixel(getState())(getMouseEventPos(event));
-            pushPosition(pos);
+            switch (getMode()) {
+                case 'add': return pushPosition(pos);
+                case 'insert': return insertPosition(pos);
+                case 'delete': return deletePosition(pos);
+            }
+
         }
     };
 

@@ -131,6 +131,14 @@ export function vecEquals(v1: number[], v2: number[]) {
     return (vecDist(v1, v2) < EPSILON);
 }
 
+export function vecCenter(v1: number[], v2: number[]) {
+    const x = v1[0] + ((v2[0] - v1[0]) / 2);
+    const y = v1[1] + ((v2[1] - v1[1]) / 2);
+    return [x, y];
+}
+
+
+
 
 export function lineAngle<T extends (vec2 | number[])>(start: T, end: T): number {
     const d = [end[0] - start[0], end[1] - start[1]];
