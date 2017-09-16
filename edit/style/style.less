@@ -1,8 +1,23 @@
 @import "../../style/waend.less";
 
+@headerH : 2rem;
+@sidebarW : 350px;
+
+
+
 .edit {
+
+    .header {
+        .absolute(0, 0, initial, 0);
+        height: @headerH;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-bottom: 1px solid #000;
+    }
+
     .mode {
-        .absolute(0,0, initial,30vw);
+        .absolute(@headerH,0 , initial, @sidebarW);
         z-index: 1000;
         span {
             cursor: pointer;
@@ -11,13 +26,14 @@
     }
 
     .sidebar {
-        .absolute(0, 70vw, 0, 0);
+        .absolute(@headerH, initial, 0, 0);
+        width: @sidebarW;
         border-right: 1px solid #000;
         padding: @margin;
         overflow-y: auto;
     }
     .map {
-        .absolute(0, 0, 0, 30vw);
+        .absolute(@headerH, 0, 0, @sidebarW);
 
         .map-view{
             .absolute(0,0,0,0);
@@ -48,12 +64,17 @@
     }
 
     .selected{
-        color: blue;
+        color: @blue;
     }
     .interactive{
         cursor: pointer;
     }
     .active {
-        color: rgba(255, 0, 4, 0.90);
+        color: @blue;
+    }
+
+    .btn-feature-select {
+        &.checked {.btn-color(red, red, @white);}
+        &.unchecked {.btn-color(blue, blue, @white);}
     }
 }

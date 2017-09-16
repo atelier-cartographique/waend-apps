@@ -30,6 +30,7 @@ export const defaultSelectState =
 const renderItemDetail =
     (selected: boolean) =>
         (id: string, name: string) => {
+            const titleSelect = selected ? 'selected' : 'select';
             const checked = selected ? 'btn-feature-select checked' : 'btn-feature-select unchecked';
             const setName =
                 () =>
@@ -54,6 +55,7 @@ const renderItemDetail =
                         BUTTON({
                             onClick: action,
                             className: checked,
+                            title: titleSelect,
                         }, '•'),
                         INPUT({
                             type: 'text',
@@ -68,7 +70,8 @@ const renderItemDetail =
                     BUTTON({
                         onClick: action,
                         className: checked,
-                    }),
+                        title: titleSelect,
+                    }, '•'),
                     INPUT({
                         type: 'text',
                         value: getInputValue(`${id}.name`).fold(() => name, v => v),

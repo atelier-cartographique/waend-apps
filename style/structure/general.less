@@ -80,8 +80,8 @@ input:focus, textarea:focus, select:focus {
 
 button {
     font-family: monospace;
-    min-width: 3rem;
-    padding: @margin / 2 @margin;
+    min-width: 2.25rem;
+    padding: @margin / 2 ;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -94,13 +94,4 @@ button {
     .btn-color(@green, @green, @white);
 
     &.remove {.btn-color(red, red, @white);}
-}
-
-.btn-feature-select {
-    height: 25px;
-    width: 25px;
-    min-width: 25px;
-    min-height: 25px;
-    &.checked {.btn-color(red, red, @white);}
-    &.unchecked {.btn-color(blue, blue, @white);}
 }

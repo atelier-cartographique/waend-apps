@@ -1,4 +1,4 @@
-import { DIV, H1 } from '../elements';
+import { DIV, H1, A } from '../elements';
 import events from '../../events/app';
 import queries from '../../queries/app';
 // import { getMapName } from '../../queries/map';
@@ -33,6 +33,13 @@ const renderNoMap =
         );
     };
 
+const header =
+    () => DIV({
+        className:'header',
+    }, A({
+        href:'../dashboard/',
+    }, 'dasboard'));
+
 const mapView = mapViewFunction();
 
 const sidebar =
@@ -41,9 +48,9 @@ const sidebar =
 }, child);
 
 const renderSelect =
-    () => DIV({}, mode(), mapView(), sidebar(select()));
+    () => DIV({}, header(), mode(), mapView(), sidebar(select()));
 const renderTrace =
-    () => DIV({}, mode(), mapView(), sidebar(trace()));
+    () => DIV({}, header(), mode(), mapView(), sidebar(trace()));
 
 const renderWithMap =
     () => {
