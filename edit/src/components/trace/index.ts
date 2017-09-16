@@ -2,7 +2,7 @@
 import { Position } from '../../source/io/geojson';
 import { getMode } from '../../queries/trace';
 import { setMode } from '../../events/trace';
-import { DIV, SPAN } from '../elements';
+import { DIV, BUTTON } from '../elements';
 import { fromPredicate } from 'fp-ts/lib/Option';
 
 export type TraceStateType = 'LineString' | 'Polygon';
@@ -29,11 +29,11 @@ const renderAction =
     (m: TraceStateMode) =>
         ModeOption(m)
             .fold(
-            () => SPAN({
+            () => BUTTON({
                 className: 'interactive',
                 onClick: () => setMode(m),
             }, ` ${m} `),
-            () => SPAN({
+            () => BUTTON({
                 className: 'active',
             }, ` ${m} `));
 
