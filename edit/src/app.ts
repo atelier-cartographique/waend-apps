@@ -6,7 +6,6 @@ import { IStoreInteractions } from './source';
 import { getBinder } from 'waend/shell';
 import events from './events/app';
 import queries from './queries/app';
-import importC from './components/import';
 import mainC from './components/main';
 import { fromNullable } from 'fp-ts/lib/Option';
 import { User } from 'waend/lib';
@@ -38,7 +37,6 @@ const wrapMain =
 const renderMain = (): React.DOMElement<{}, Element> => {
     switch (queries.getLayout()) {
         case 'main': return wrapMain(mainC());
-        case 'import': return wrapMain(importC());
     }
 };
 

@@ -9,9 +9,9 @@ import { Option, none, some } from 'fp-ts/lib/Option';
 import { getRect } from 'waend/map/queries';
 import { getSelectionGroup } from '../../queries/select';
 import { getTraceGroup } from '../../queries/trace';
+import { getImportGroup } from '../../queries/import';
 
 const logger = debug('waend:comp/map/overlay');
-
 export const overlayData =
     (features: any[]) => ({
         layers: [{
@@ -26,7 +26,9 @@ const getData =
         switch (mode) {
             case 'base': return overlayData([]);
             case 'select': return getSelectionGroup();
-            case 'trace': return getTraceGroup();
+            case 'trace.line':
+            case 'trace.polygon': return getTraceGroup();
+            case 'import': return getImportGroup();
         }
     };
 

@@ -1,4 +1,5 @@
 import { query } from './index';
+import { overlayData } from '../components/map/overlay';
 
 
 
@@ -7,3 +8,7 @@ export const getPendingFeatures =
 
 export const getImportMode =
     () => query('component/import').mode;
+
+
+export const getImportGroup =
+    () => overlayData([]);

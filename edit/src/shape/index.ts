@@ -9,7 +9,6 @@ import { TraceState, defaultTraceState } from '../components/trace';
 
 export type AppLayout =
     | 'main'
-    | 'import'
     ;
 
 
@@ -18,7 +17,9 @@ export type NewState = 'initial' | 'processing' | 'done' | 'failed' | null;
 export type AppMode =
     | 'base'
     | 'select'
-    | 'trace'
+    | 'import'
+    | 'trace.line'
+    | 'trace.polygon'
     ;
 
 export interface InputState {

@@ -219,11 +219,8 @@ const renderFrame: FrameFn =
         clearTextureIndex();
 
         const poly = currentExtent.toPolygon().getCoordinates();
-        console.log(`poly ${poly}`);
         polygonProject(poly);
-        console.log(`projected poly ${poly}`);
         polygonTransform(currentTransform, poly);
-        console.log(`transformed poly ${poly}`);
         const tpoly = new Polygon({
             type: 'Polygon',
             coordinates: poly,
@@ -263,7 +260,7 @@ const renderFrame: FrameFn =
                     console.log(`Batch ${frameId} ${offset}/${features.length}`);
                     const commands: PainterCommand[] = [];
                     const limit = offset + batchSize;
-                    for (let i = offset; i < limit; i++) {
+                    for (let i = offset; i < limit; i += 1) {
                         if (i < features.length) {
                             processFeature(features[i]).forEach((pc) => {
                                 commands.push(pc);

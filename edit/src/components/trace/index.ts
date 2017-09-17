@@ -1,6 +1,6 @@
 
 import { Position } from '../../source/io/geojson';
-import { getMode } from '../../queries/trace';
+import { getMode, isNew, isPolygon } from '../../queries/trace';
 import { setMode } from '../../events/trace';
 import { DIV, BUTTON } from '../elements';
 import { fromPredicate } from 'fp-ts/lib/Option';
@@ -37,8 +37,21 @@ const renderAction =
                 className: 'active',
             }, ` ${m} `));
 
+const actions =
+    () => {
+        if (isNew()) {
+            return ['add', 'insert', 'delete', 'move'];
+        }
+        return (
+            isPolygon()
+                .fold(
+                () => ['add', 'insert', 'delete', 'move'],
+                () => ['insert', 'delete', 'move'],
+            ));
+    }
+
 const renderActions =
-    () => ['add', 'insert', 'delete', 'move'].map(renderAction);
+    () => actions().map(renderAction);
 
 const render =
     () => DIV({}, ...renderActions());

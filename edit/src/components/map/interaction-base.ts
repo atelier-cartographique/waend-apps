@@ -1,4 +1,4 @@
-import { logger } from './interactions';
+// import { logger } from './interactions';
 import { updateInteraction, transformExtent, setExtent } from '../../events/map';
 import { getInteractionState, getState as getMapState } from '../../queries/map';
 import { vecDist } from 'waend/util';
@@ -53,7 +53,6 @@ export const onMouseMove =
 
 export const onMouseUp =
     (event: React.MouseEvent<Element>) => {
-        logger(`onMouseUp`)
         const { startPoint, isStarted, isPanning } = getInteractionState();
         if (isStarted) {
             const endPoint = getMouseEventPos(event);

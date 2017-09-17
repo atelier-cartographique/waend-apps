@@ -41,11 +41,9 @@ const queries = {
 
     getCurrentLayer() {
         const layerIndex = query('app/layerIndex');
-        logger('getCurrentLayer layerIndex', layerIndex);
         return (
             queries.getMap()
                 .fold(() => none, (map) => {
-                    logger(`getCurrentLayer map ${layerIndex}`, map);
                     const layers = map.layers;
                     return (
                         layerIndex >= 0 && layerIndex < layers.length ?

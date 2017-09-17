@@ -1,13 +1,18 @@
 
 import * as debug from 'debug';
+import * as Promise from 'bluebird';
 import { dispatch } from './index';
 import { query } from '../queries';
 import { AppLayout, NewState, AppMode } from '../shape';
 import { User, getconfig } from 'waend/lib';
-import { fromNullable } from 'fp-ts/lib/Option';
+import { fromNullable, none } from 'fp-ts/lib/Option';
 import { getBinder, Transport } from 'waend/shell';
-import { markDirty, zoomToMapExtent, markDirtyData } from './map';
+import { markDirty, zoomToMapExtent, markDirtyData, markOverlayDirty } from './map';
 import { getDataOption } from '../queries/map';
+import { Properties, DirectGeometryObject } from '../source/io/geojson';
+import appQueries from '../queries/app';
+import { resetSelection } from './select';
+import { resetLine, resetPolygon } from './trace';
 
 
 const logger = debug('waend:events/app');
@@ -32,6 +37,18 @@ const events = {
 
     setMode(m: AppMode) {
         dispatch('app/mode', () => m);
+        switch (m) {
+            case 'select':
+                resetSelection();
+                break;
+            case 'trace.line':
+                resetLine();
+                break;
+            case 'trace.polygon':
+                resetPolygon();
+                break;
+        }
+        markOverlayDirty();
     },
 
     setLayout(l: AppLayout) {
@@ -101,6 +118,47 @@ const events = {
             });
     },
 
+    createFeature(geom: DirectGeometryObject, properties: Properties) {
+        return (new Promise((resolve, reject) => {
+            fromNullable(query('data/user'))
+                .map(user =>
+                    getDataOption()
+                        .map((g) => {
+                            const uid: string = user.id;
+                            const gid: string = g.id;
+                            return (
+                                appQueries
+                                    .getCurrentLayer()
+                                    .map((layer) => {
+                                        const lid = layer.id;
+                                        getBinder()
+                                            .setFeature(uid, gid, lid, {
+                                                layer_id: lid,
+                                                user_id: uid,
+                                                properties: properties === null ? {} : properties,
+                                                geom,
+                                            }, false)
+                                            .then((created) => {
+                                                resolve(created);
+                                                dispatch('data/map', (m) => {
+                                                    m.layers.forEach((l: any) => {
+                                                        if (l.id === lid) {
+                                                            l.features.push(created.cloneData());
+                                                        }
+                                                    });
+                                                    return m;
+                                                });
+                                            })
+                                            .then(markDirtyData)
+                                            .catch(reject);
+                                        return lid;
+                                    }));
+                        })
+                        .fold(() => none, s => s))
+                .chain(r => r)
+                .fold(reject, lid => lid);
+        }));
+    },
 
     updateFeature(feature: any) {
         fromNullable(query('data/user'))
@@ -118,6 +176,7 @@ const events = {
                         if (lid) {
                             getBinder()
                                 .setFeature(uid, gid, lid, {
+                                    id: feature.id,
                                     user_id: uid,
                                     layer_id: lid,
                                     geom: feature.geom,

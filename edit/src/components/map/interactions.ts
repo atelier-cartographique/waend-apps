@@ -5,6 +5,7 @@ import { zoomToMapExtent } from '../../events/map';
 import baseInteraction from './interaction-base';
 import selectInteraction from './interaction-select';
 import traceInteraction from './interaction-trace';
+import importInteraction from './interaction-import';
 import queries from '../../queries/app';
 
 export const logger = debug('waend:comp/map/inteactions')
@@ -58,13 +59,21 @@ const renderTrace =
         ...traceInteraction,
     });
 
+const renderImport =
+    () => DIV({
+        className: 'map-interactions import',
+        ...importInteraction,
+    });
+
 const render =
     () => {
         logger(`render ${queries.getMode()}`)
         switch (queries.getMode()) {
             case 'base': return renderBase();
             case 'select': return renderSelect();
-            case 'trace': return renderTrace();
+            case 'trace.line':
+            case 'trace.polygon': return renderTrace();
+            case 'import': return renderImport();
         }
     };
 

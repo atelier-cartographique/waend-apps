@@ -4,30 +4,32 @@ import queries from '../../queries/app';
 import { AppMode } from '../../shape';
 import { fromPredicate } from 'fp-ts/lib/Option';
 
-const importMode = SPAN({
-    onClick: () => {
-        events.setMode('base');
-        events.setLayout('import');
-    }
-}, 'import');
 
 const renderMode =
-    (m: AppMode) =>
+    (m: AppMode, label: string) =>
         fromPredicate(pm => pm === m)(queries.getMode())
             .fold(
             () => SPAN({
                 onClick: () => events.setMode(m),
-            }, m),
+            }, label),
             () => SPAN({
                 className: 'active',
-            }, m),
+            }, label),
         );
 
+type Arg = [AppMode, string];
+const argList: Arg[] = [
+    ['select', 'Select'],
+    ['trace.line', 'Line'],
+    ['trace.polygon', 'Polygon'],
+    ['import', 'Import'],
+];
+
 const modes =
-    () => ['base', 'select', 'trace'].map(renderMode);
+    () => argList.map(t => renderMode(t[0], t[1]));
 
 
 const render =
-    () => DIV({ className: 'mode' }, ...modes(), importMode);
+    () => DIV({ className: 'mode' }, ...modes());
 
 export default render;

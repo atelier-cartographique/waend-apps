@@ -6,6 +6,7 @@ import mapViewFunction from '../map';
 import mode from './mode';
 import select from '../select';
 import trace from '../trace';
+import importComp from '../import';
 
 
 const renderNew =
@@ -35,29 +36,33 @@ const renderNoMap =
 
 const header =
     () => DIV({
-        className:'header',
+        className: 'header',
     }, A({
-        href:'../dashboard/',
+        href: '../dashboard/',
     }, 'dasboard'));
 
 const mapView = mapViewFunction();
 
 const sidebar =
-(child:React.ReactNode) => DIV({
-    className:'sidebar',
-}, child);
+    (child: React.ReactNode) => DIV({
+        className: 'sidebar',
+    }, child);
 
 const renderSelect =
     () => DIV({}, header(), mode(), mapView(), sidebar(select()));
 const renderTrace =
     () => DIV({}, header(), mode(), mapView(), sidebar(trace()));
+const renderImport =
+    () => DIV({}, header(), mode(), mapView(), sidebar(importComp()));
 
 const renderWithMap =
     () => {
         switch (queries.getMode()) {
             case 'base':
             case 'select': return renderSelect();
-            case 'trace': return renderTrace();
+            case 'trace.line':
+            case 'trace.polygon': return renderTrace();
+            case 'import': return renderImport();
         }
         // return (
         //     DIV({},
