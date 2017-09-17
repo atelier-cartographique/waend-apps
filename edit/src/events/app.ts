@@ -113,6 +113,8 @@ const events = {
                     .then((a) => {
                         logger(`All went well and smooth with layer creation ${a.id}`);
                         dispatch('app/new', () => <NewState>'done');
+                        fromNullable(query('app/mapId'))
+                            .map(mid => events.loadMap(uid, mid));
                     })
                     .catch(() => dispatch('app/new', () => <NewState>'failed'));
             });
