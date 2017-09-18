@@ -63,7 +63,9 @@ const renderItemDetail =
                             value: getInputValue(`${id}.name`).fold(() => '', v => v),
                             onChange: e => setInputValue(`${id}.name`, e.target.value),
                         }),
-                        BUTTON({ onClick: setName }, 'update name')));
+                        BUTTON({ onClick: setName }, 'update name'),
+                        BUTTON({}, 'remove'),
+                    ));
             }
             return (
                 DIV({ key: id },
@@ -77,7 +79,9 @@ const renderItemDetail =
                         value: getInputValue(`${id}.name`).fold(() => name, v => v),
                         onChange: e => setInputValue(`${id}.name`, e.target.value),
                     }),
-                    BUTTON({ onClick: setName }, 'update name')));
+                    BUTTON({ onClick: setName }, 'update name'),
+                    BUTTON({}, 'remove'),
+                ));
         };
 const renderSelected = renderItemDetail(true);
 const renderNotSelected = renderItemDetail(false);
@@ -106,12 +110,23 @@ const filterNotNull =
         return r;
     };
 
+const selectHeader =
+    () => {
+        const selectAll = () => BUTTON({}, 'select all');
+        const selectNone = () => BUTTON({}, 'select none');
+        const clearAll = () => BUTTON({}, 'clear all');
+        return DIV({
+            className: 'selectheader disable',
+        }, selectAll(), selectNone(), clearAll());
+    };
+
 const selectedItems =
     () => {
+        // TODO : remove SelectHeader disabled classname if item > 0
         const items = filterNotNull(getSelectedUnder().map(renderItem).filter(i => i !== null));
         return DIV({
-            className: 'selecteditems'
-        }, ...items);
+            className: 'selecteditems',
+        }, selectHeader(), ...items);
     };
 
 const styleTools =
@@ -121,10 +136,7 @@ const styleTools =
         }, 'here will be the style tools');
 
 const render =
-    () => {
-
-        return DIV({}, selectedItems(), styleTools());
-    };
+    () => DIV({ className: 'select' }, selectedItems(), styleTools());
 
 export default render;
 
