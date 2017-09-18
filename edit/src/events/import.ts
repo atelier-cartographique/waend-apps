@@ -2,6 +2,7 @@
 import * as debug from 'debug';
 import { dispatch } from './index';
 import queries from '../queries/app';
+import appEvents from './app';
 import * as Promise from 'bluebird';
 import * as io from 'io-ts';
 import {
@@ -11,7 +12,10 @@ import {
 } from '../source/io/geojson';
 import { UserImportState } from 'src/components/import';
 import { getBinder } from 'waend/shell';
-import { Feature, isDirectGeometry } from 'waend/lib';
+import { isDirectGeometry, ModelData } from 'waend/lib';
+import { getPendingFeatures } from '../queries/import';
+import { tail } from 'fp-ts/lib/Array';
+import { zoomToMapExtent } from './map';
 
 const logger = debug('waend:events/import');
 
@@ -99,37 +103,54 @@ export const updatePendingFeatures =
     };
 
 
+const addFeaturesToMap =
+    (fs: ModelData[]) => {
+        queries.getCurrentLayer()
+            .map(layer => layer.id)
+            .map(lid => dispatch('data/map', (g) => {
+                g.layers.forEach((l: any) => {
+                    if (l.id === lid) {
+                        logger(`concat ${fs.length} features to ${lid}`)
+                        l.features = l.features.concat(fs);
+                    }
+                });
+                return g;
+            }));
+    };
+
 export const importPendingFeatures =
     () => {
         const [uid, mid] = [queries.getUserId(), queries.getMapId()].map((a) => a.fold(() => null, a => a));
-        logger('importPendingFeatures', uid, mid);
+        const fs: ModelData[] = [];
         if (uid && mid) {
+            const pendings = getPendingFeatures().slice();
             queries.getCurrentLayer()
                 .map((layer) => {
-                    logger('layer', layer);
-                    dispatch('component/import', (state) => {
-                        const fs = state.pendingFeatures;
-
-                        Promise.all<Feature>(fs.map((f) => {
-                            const { geometry } = f;
-                            if (geometry && isDirectGeometry(geometry)) {
-                                return (
-                                    getBinder()
-                                        .setFeature(uid, mid, layer.id, {
-                                            user_id: uid,
-                                            layer_id: layer.id,
-                                            properties: f.properties || {},
-                                            geom: geometry,
-                                        }, true));
-                            }
-                            return Promise.reject('Not a geometry');
-                        })).then((fs) => {
-                            fs.map((f) => {
-                                logger(f);
-                            });
-                        });
-                        return { ...state, pendingFeatures: [] };
+                    Promise.mapSeries(pendings, (f, index) => {
+                        logger(`@ ${index}`);
+                        dispatch('component/import', state => ({
+                            ...state,
+                            pendingFeatures: tail(state.pendingFeatures).getOrElse(() => { throw (new Error('CouldNotTail')) }),
+                        }))
+                        const { geometry } = f;
+                        if (geometry && isDirectGeometry(geometry)) {
+                            return (
+                                getBinder()
+                                    .setFeature(uid, mid, layer.id, {
+                                        user_id: uid,
+                                        layer_id: layer.id,
+                                        properties: f.properties || {},
+                                        geom: geometry,
+                                    }, true)
+                                    .then(f => fs.push(f.cloneData()))
+                            );
+                        }
+                        return Promise.resolve(fs.length);
                     })
+                        .then(() => addFeaturesToMap(fs))
+                        .then(zoomToMapExtent)
+                        .then(() => appEvents.setMode('select'))
+                        .catch(err => logger(`err ${err}`));
                 });
         }
     };
