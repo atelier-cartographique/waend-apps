@@ -1,0 +1,31 @@
+
+
+.edit {
+
+    .selected{
+        color: @blue;
+    }
+    .interactive{
+        cursor: pointer;
+    }
+    .active {
+        color: @blue;
+    }
+
+    .btn-feature-select {
+        &.checked {.btn-color(red, red, @white);}
+        &.unchecked {.btn-color(blue, blue, @white);}
+    }
+
+    .sidebar {
+        .selecteditems {
+            .absolute(0, 0, 50%, 0);
+            overflow-y: auto;
+        }
+        .styletools {
+            .absolute(50%, 0, 0, 0);
+            overflow-y: auto;
+            border-top: 1px solid #000;
+        }
+    }
+}
