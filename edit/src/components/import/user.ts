@@ -1,19 +1,8 @@
-import { DIV, INPUT, BUTTON, A } from '../elements';
+import { DIV, INPUT, BUTTON } from '../elements';
 import { updatePendingFeatures, importPendingFeatures } from '../../events/import';
 import { getPendingFeatures } from '../../queries/import';
 
 
-const header =
-    () => DIV({
-        className:'header',
-    }, A({
-        href:'../dashboard/',
-    }, 'dasboard'));
-
-const sidebar =
-    () => DIV({
-        className:'sidebar',
-    }, selectFile());
 
 const selectFile =
     () => DIV({},
@@ -32,8 +21,7 @@ const selectFile =
 
 const render =
     () => (DIV({},
-        header(),
-        sidebar(),
+        selectFile(),
     ));
 
 export default render;

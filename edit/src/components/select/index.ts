@@ -106,10 +106,24 @@ const filterNotNull =
         return r;
     };
 
-const render =
+const selectedItems =
     () => {
         const items = filterNotNull(getSelectedUnder().map(renderItem).filter(i => i !== null));
-        return DIV({}, ...items);
+        return DIV({
+            className: 'selecteditems'
+        }, ...items);
+    };
+
+const styleTools =
+    () =>
+        DIV({
+            className: 'styletools',
+        }, 'here will be the style tools');
+
+const render =
+    () => {
+
+        return DIV({}, selectedItems(), styleTools());
     };
 
 export default render;
