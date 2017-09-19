@@ -18,6 +18,7 @@ import { getPendingFeatures } from '../queries/import';
 import { tail } from 'fp-ts/lib/Array';
 import { zoomToMapExtent } from './map';
 import { getGeoExtent } from 'waend/map/queries';
+import { getState } from '../queries/map';
 
 const logger = debug('waend:events/import');
 const transport = new Transport();
@@ -46,18 +47,19 @@ export const intersects =
             .then(f => f(geom, (a: any) => a));
 
 
-
-
-observe('component/map', (s) => {
-    if (queries.getMode() === 'import') {
-        const e = getGeoExtent(s);
-        const p = (new Extent(e)).toPolygon();
-        intersects(p.toGeoJSON())
-            .then(data =>
-                dispatch('component/import',
-                    si => ({ ...si, mapsInViewPort: data })));
+export const loadMapsInview =
+    () => {
+        if (queries.getMode() === 'import') {
+            const e = getGeoExtent(getState());
+            const p = (new Extent(e)).toPolygon();
+            intersects(p.toGeoJSON())
+                .then(data =>
+                    dispatch('component/import',
+                        si => ({ ...si, mapsInViewPort: data })));
+        }
     }
-});
+
+observe('component/map', loadMapsInview);
 
 
 
