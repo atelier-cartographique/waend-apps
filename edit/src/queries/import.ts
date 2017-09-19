@@ -12,3 +12,7 @@ export const getImportMode =
 
 export const getImportGroup =
     () => overlayData([]);
+
+
+export const getMapsInView =
+    () => query('component/import').mapsInViewPort;

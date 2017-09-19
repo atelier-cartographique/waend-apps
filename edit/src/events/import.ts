@@ -1,6 +1,6 @@
 
 import * as debug from 'debug';
-import { dispatch } from './index';
+import { dispatch, observe } from './index';
 import queries from '../queries/app';
 import appEvents from './app';
 import * as Promise from 'bluebird';
@@ -9,16 +9,57 @@ import {
     FeatureCollectionIO,
     FeatureCollection,
     Feature as GeoJSONFeature,
+    DirectGeometryObject,
 } from '../source/io/geojson';
-import { UserImportState } from 'src/components/import';
+import { UserFileImportState, ImportMode } from '../components/import';
 import { getBinder, Transport } from 'waend/shell';
-import { isDirectGeometry, ModelData } from 'waend/lib';
+import { isDirectGeometry, ModelData, getconfig, Extent } from 'waend/lib';
 import { getPendingFeatures } from '../queries/import';
 import { tail } from 'fp-ts/lib/Array';
 import { zoomToMapExtent } from './map';
+import { getGeoExtent } from 'waend/map/queries';
 
 const logger = debug('waend:events/import');
 const transport = new Transport();
+
+
+export const setImportMode =
+    (mode: ImportMode) => dispatch('component/import', s => ({ ...s, mode }));
+
+const fetchGroupIntersects =
+    (apiUrl: string) =>
+        (geom: DirectGeometryObject, parse: (a: any) => any) => {
+            return (
+                transport.post({
+                    url: `${apiUrl}/group/intersects/`,
+                    body: geom,
+                    parse,
+                })
+            );
+        };
+
+export const intersects =
+    (geom: DirectGeometryObject) =>
+        getconfig('apiUrl')
+            .then(fetchGroupIntersects)
+            .catch(logger)
+            .then(f => f(geom, (a: any) => a));
+
+
+
+
+observe('component/map', (s) => {
+    if (queries.getMode() === 'import') {
+        const e = getGeoExtent(s);
+        const p = (new Extent(e)).toPolygon();
+        intersects(p.toGeoJSON())
+            .then(data =>
+                dispatch('component/import',
+                    si => ({ ...si, mapsInViewPort: data })));
+    }
+});
+
+
 
 const stringify = (value: any): string => {
     return typeof value === 'function' ? io.getFunctionName(value) : JSON.stringify(value);
@@ -85,19 +126,19 @@ const getFeatureList =
 export const updatePendingFeatures =
     (fs: FileList | null) => {
         if (fs) {
-            dispatch('component/import', state => ({ ...state, userImport: 'validating' as UserImportState }));
+            dispatch('component/import', state => ({ ...state, userImport: 'fileValidating' as UserFileImportState }));
             getFeatureList(fs)
                 .then((features) => {
                     dispatch('component/import', state => ({
                         ...state,
                         pendingFeatures: features,
-                        userImport: 'validated' as UserImportState,
+                        userImport: 'fileValidated' as UserFileImportState,
                     }));
                 })
                 .catch(() => dispatch('component/import', state => ({
                     ...state,
                     pendingFeatures: [],
-                    userImport: 'validated' as UserImportState,
+                    userImport: 'fileValidated' as UserFileImportState,
                 })));
         }
     };
