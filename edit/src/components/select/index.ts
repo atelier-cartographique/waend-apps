@@ -112,17 +112,15 @@ const filterNotNull =
 
 const selectHeader =
     () => {
-        const selectAll = () => BUTTON({}, 'select all');
-        const selectNone = () => BUTTON({}, 'select none');
-        const clearAll = () => BUTTON({}, 'clear all');
-        return DIV({
-            className: 'selectheader disable',
-        }, selectAll(), selectNone(), clearAll());
+        const selectAll = () => BUTTON({ className: 'disabled' }, 'select all');
+        const selectNone = () => BUTTON({ className: 'disabled' }, 'select none');
+        const clearAll = () => BUTTON({ className: 'disabled' }, 'clear all');
+        return DIV({ className: 'selectheader' }, selectAll(), selectNone(), clearAll());
     };
 
 const selectedItems =
     () => {
-        // TODO : remove SelectHeader disabled classname if item > 0
+        // TODO : remove BUTTONS disabled classname if item > 0
         const items = filterNotNull(getSelectedUnder().map(renderItem).filter(i => i !== null));
         return DIV({
             className: 'selecteditems',
