@@ -11,14 +11,14 @@ import {
     Feature as GeoJSONFeature,
 } from '../source/io/geojson';
 import { UserImportState } from 'src/components/import';
-import { getBinder } from 'waend/shell';
+import { getBinder, Transport } from 'waend/shell';
 import { isDirectGeometry, ModelData } from 'waend/lib';
 import { getPendingFeatures } from '../queries/import';
 import { tail } from 'fp-ts/lib/Array';
 import { zoomToMapExtent } from './map';
 
 const logger = debug('waend:events/import');
-
+const transport = new Transport();
 
 const stringify = (value: any): string => {
     return typeof value === 'function' ? io.getFunctionName(value) : JSON.stringify(value);
@@ -154,6 +154,11 @@ export const importPendingFeatures =
                 });
         }
     };
+
+export const listGroupsInViewPort =
+    () => {
+
+    }
 
 
 logger('loaded');
