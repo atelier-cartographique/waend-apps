@@ -17,11 +17,18 @@
         &.unchecked {.btn-color(blue, blue, @white);}
     }
 
-    .sidebar {
+    .sidebar .select {
         .selecteditems {
             .absolute(0, 0, 50%, 0);
             overflow-y: auto;
+
+            .selectheader {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: @margin;
+            }
         }
+
         .styletools {
             .absolute(50%, 0, 0, 0);
             overflow-y: auto;
