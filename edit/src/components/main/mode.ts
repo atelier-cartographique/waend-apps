@@ -19,6 +19,7 @@ const renderMode =
 
 type Arg = [AppMode, string];
 const argList: Arg[] = [
+    ['base', 'Info'],
     ['select', 'Select'],
     ['trace.line', 'Line'],
     ['trace.polygon', 'Polygon'],

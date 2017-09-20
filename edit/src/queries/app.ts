@@ -56,6 +56,10 @@ const queries = {
         return fromNullable(query('data/map'));
     },
 
+    getMapProperties() {
+        return queries.getMap().map(g => g.properties);
+    },
+
     getNew() {
         return fromNullable(query('app/new'));
     },

@@ -7,6 +7,7 @@ import mode from './mode';
 import select from '../select';
 import trace from '../trace';
 import importComp from '../import';
+import info from '../info';
 
 
 const renderNew =
@@ -48,6 +49,8 @@ const sidebar =
         className: 'sidebar',
     }, child);
 
+const renderInfo =
+    () => DIV({}, header(), mode(), mapView(), sidebar(info()));
 const renderSelect =
     () => DIV({}, header(), mode(), mapView(), sidebar(select()));
 const renderTrace =
@@ -58,7 +61,7 @@ const renderImport =
 const renderWithMap =
     () => {
         switch (queries.getMode()) {
-            case 'base':
+            case 'base': return renderInfo();
             case 'select': return renderSelect();
             case 'trace.line':
             case 'trace.polygon': return renderTrace();

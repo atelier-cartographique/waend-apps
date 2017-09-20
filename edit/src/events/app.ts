@@ -13,6 +13,7 @@ import { Properties, DirectGeometryObject } from '../source/io/geojson';
 import appQueries from '../queries/app';
 import { resetSelection } from './select';
 import { resetLine, resetPolygon } from './trace';
+import { resetImport } from './import';
 
 
 const logger = debug('waend:events/app');
@@ -46,6 +47,9 @@ const events = {
                 break;
             case 'trace.polygon':
                 resetPolygon();
+                break;
+            case 'import':
+                resetImport();
                 break;
         }
         markOverlayDirty();
@@ -199,7 +203,36 @@ const events = {
                     });
             });
     },
+
+    updateMap(props: any) {
+        fromNullable(query('data/user'))
+            .map((user) => {
+                getDataOption()
+                    .map(g =>
+                        getconfig('apiUrl')
+                            .then(apiUrl => transport.put({
+                                url: `${apiUrl}/user/${user.id}/group/${g.id}`,
+                                body: updateModelProperties(g, props),
+                                parse: a => a,
+                            }))
+                            .then(() =>
+                                dispatch('data/map',
+                                    s => updateModelProperties(s, props))),
+                );
+            });
+    }
 };
+
+
+const updateModelProperties =
+    (m: any, properties: any) => ({
+        ...m,
+        properties: {
+            ...m.properties,
+            ...properties,
+        },
+    });
+
 
 export default events;
 

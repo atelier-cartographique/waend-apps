@@ -12,7 +12,7 @@ import {
     Feature as GeoJSONFeature,
     DirectGeometryObject,
 } from '../source/io/geojson';
-import { UserFileImportState, ImportMode } from '../components/import';
+import { UserFileImportState, ImportMode, defaultImportState } from '../components/import';
 import { getBinder, Transport } from 'waend/shell';
 import { isDirectGeometry, ModelData, getconfig, Extent } from 'waend/lib';
 import { getPendingFeatures } from '../queries/import';
@@ -24,9 +24,12 @@ import { getState } from '../queries/map';
 const logger = debug('waend:events/import');
 const transport = new Transport();
 
+export const resetImport =
+    () => dispatch('component/import', () => defaultImportState())
 
 export const setImportMode =
     (mode: ImportMode) => dispatch('component/import', s => ({ ...s, mode }));
+
 
 const fetchGroupIntersects =
     (apiUrl: string) =>
@@ -204,5 +207,14 @@ export const pushPosition =
         dispatch('component/import', s => ({ ...s, coordinates: s.coordinates.concat([p]) }));
         markOverlayDirty();
     };
+
+export const pushTag =
+    (t: string) => dispatch('component/import', s => ({
+        ...s,
+        // selectedTags: s.selectedTags.concat([t]),
+        selectedTags: [t],
+    }));
+
+
 
 logger('loaded');
