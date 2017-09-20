@@ -29,6 +29,8 @@ import * as debug from 'debug';
 import { DataQuery, CompQuery } from './index';
 import Renderer from './Renderer';
 import { getLayers, getRect } from './queries';
+import { partitionMap } from 'fp-ts/lib/Array';
+import { fromPredicate } from 'fp-ts/lib/Either';
 
 const logger = debug('waend:map/view');
 
@@ -93,6 +95,8 @@ export default class View {
                 return r;
             })
             .forEach(r => r.renderer.render());
+
+        this.cleanRenderers();
     }
 
     resize() {
@@ -219,6 +223,22 @@ export default class View {
                 r.canvas.style.zIndex = (-idx).toString();
                 return r;
             });
+    }
+
+    cleanRenderers() {
+        const layers = getLayers(this.data());
+        const rInL =
+            (r: DispositifDeRendu) => layers.findIndex(l => l.id === r.id) >= 0;
+        const isLive = fromPredicate(rInL, r => r);
+        const { left, right } = partitionMap(isLive, this.ddr);
+        this.ddr = right;
+        left.forEach((r) => {
+            const { canvas, renderer } = r;
+            renderer.stop();
+            if (canvas.parentNode) {
+                canvas.parentNode.removeChild(canvas);
+            }
+        });
     }
 
     forEachImage(fn: (a: ImageData) => void) {

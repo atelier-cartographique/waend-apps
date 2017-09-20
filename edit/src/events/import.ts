@@ -6,6 +6,7 @@ import appEvents from './app';
 import * as Promise from 'bluebird';
 import * as io from 'io-ts';
 import {
+    Position,
     FeatureCollectionIO,
     FeatureCollection,
     Feature as GeoJSONFeature,
@@ -16,7 +17,7 @@ import { getBinder, Transport } from 'waend/shell';
 import { isDirectGeometry, ModelData, getconfig, Extent } from 'waend/lib';
 import { getPendingFeatures } from '../queries/import';
 import { tail } from 'fp-ts/lib/Array';
-import { zoomToMapExtent } from './map';
+import { zoomToMapExtent, markOverlayDirty } from './map';
 import { getGeoExtent } from 'waend/map/queries';
 import { getState } from '../queries/map';
 
@@ -198,10 +199,10 @@ export const importPendingFeatures =
         }
     };
 
-export const listGroupsInViewPort =
-    () => {
-
-    }
-
+export const pushPosition =
+    (p: Position) => {
+        dispatch('component/import', s => ({ ...s, coordinates: s.coordinates.concat([p]) }));
+        markOverlayDirty();
+    };
 
 logger('loaded');

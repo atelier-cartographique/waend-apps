@@ -37,23 +37,12 @@ const renderFn =
                             className: 'map-view',
                             key: mapKey,
                             ref: (node) => {
-                                // const u = un();
                                 if (node) {
                                     map.getView().attach(node);
                                     const r = node.getBoundingClientRect();
                                     if (!checkRect(r)) {
                                         setRect(r);
                                     }
-                                    // const i = setInterval(() => {
-                                    //     if (!node) {
-                                    //         clearInterval(i);
-                                    //         return;
-                                    //     }
-                                    //     if (!checkRect(r)) {
-                                    //         setRect(r);
-                                    //     }
-                                    //     logger(`node[${u}] width ${node.getBoundingClientRect().width}`)
-                                    // }, 1000);
                                 }
                             },
                         }),

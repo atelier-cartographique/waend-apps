@@ -1,59 +1,42 @@
 import {
-    // getMouseEventPos,
+    getMouseEventPos,
     onMouseDown,
-    onMouseUp,
+    onMouseUp as baseMouseUp,
     onWheel,
+    onMouseMove,
 } from './interaction-base';
-// import { getState, getInteractionState } from '../../queries/map';
-// import { getCoordinateFromPixel } from 'waend/map/queries';
-// import { updateInteraction } from '../../events/map';
+import { checkImportMode } from '../../queries/import';
+import { getState } from '../../queries/map';
+import { getCoordinateFromPixel } from 'waend/map/queries';
+import { updateInteraction } from '../../events/map';
+import { pushPosition } from '../../events/import';
 
 
-// const onMouseMove =
-//     (event: React.MouseEvent<Element>) => {
-//         const { isStarted, isMoving } = getInteractionState();
-//         if (isStarted) {
-//             if (!isMoving) {
-//                 updateInteraction({ isMoving: true });
-//             }
-//             else if (getMode() === 'move') {
-//                 const pos = getCoordinateFromPixel(getState())(getMouseEventPos(event));
-//                 movePosition(pos);
-//             }
-//         }
-
-//     };
 
 
-// const onMouseUp =
-//     (event: React.MouseEvent<Element>) => {
-//         checkMode('move').fold(
-//             () => {
-//                 const dist = baseMouseUp(event);
-//                 if (dist < 4) {
-//                     const pos = getCoordinateFromPixel(getState())(getMouseEventPos(event));
-//                     switch (getMode()) {
-//                         case 'add': return pushPosition(pos);
-//                         case 'insert': return insertPosition(pos);
-//                         case 'delete': return deletePosition(pos);
-//                     }
-
-//                 }
-//             },
-//             () => {
-//                 updateInteraction({
-//                     isStarted: false,
-//                     isZooming: false,
-//                     isMoving: false,
-//                 });
-//                 setMode('add');
-//             },
-//         );
-//     };
+const onMouseUp =
+    (event: React.MouseEvent<Element>) => {
+        checkImportMode('server').fold(
+            () => { // user mode
+                updateInteraction({
+                    isStarted: false,
+                    isZooming: false,
+                    isMoving: false,
+                });
+            },
+            () => { // server mode
+                const dist = baseMouseUp(event);
+                if (dist < 4) {
+                    const pos = getCoordinateFromPixel(getState())(getMouseEventPos(event));
+                    pushPosition(pos);
+                }
+            },
+        );
+    };
 
 export default {
     onMouseDown,
-    // onMouseMove,
+    onMouseMove,
     onMouseUp,
     onWheel,
 };

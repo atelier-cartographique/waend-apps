@@ -1,6 +1,7 @@
 import { DIV, SPAN } from '../elements';
 import { Feature, Position } from '../../source/io/geojson';
 import { getImportMode, getMapsInView } from '../../queries/import';
+import appEvents from '../../events/app';
 
 import renderUser from './user';
 import { setImportMode, loadMapsInview } from '../../events/import';
@@ -26,7 +27,7 @@ export interface ImportState {
 
 export const defaultImportState =
     (): ImportState => ({
-        mode: 'user',
+        mode: 'server',
         pendingFeatures: [],
         userImport: 'fileValidated',
         coordinates: [],
@@ -38,7 +39,9 @@ export const listMapsInView =
         getMapsInView()
             .map(m =>
                 DIV({},
-                    DIV({}, m.id),
+                    DIV({
+                        onClick: () => appEvents.loadMap(m.user_id, m.id)
+                    }, m.id),
                     ...(Object.keys(m.properties)
                         .map(k =>
                             DIV({},
