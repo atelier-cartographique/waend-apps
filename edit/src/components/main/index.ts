@@ -1,4 +1,4 @@
-import { DIV, H1, A } from '../elements';
+import { DIV, H1, A, INPUT } from '../elements';
 import events from '../../events/app';
 import queries from '../../queries/app';
 // import { getMapName } from '../../queries/map';
@@ -35,12 +35,16 @@ const renderNoMap =
         );
     };
 
+
+const headerTitle = () => DIV({ className: 'header-title' }, 'Wænd - simple map editor');
+const dashboardLink = () => A({ href: '../dashboard/' }, 'my dasboard');
+const waendLink = () => A({ href: 'http://waend.com', target: '_blank' }, 'wænd.com');
+
+
 const header =
     () => DIV({
         className: 'header',
-    }, A({
-        href: '../dashboard/',
-    }, 'dasboard'));
+    }, headerTitle(), dashboardLink(), waendLink());
 
 const mapView = mapViewFunction();
 
