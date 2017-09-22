@@ -5,7 +5,7 @@ import { getImportMode, getMapsInView, getTagsInView } from '../../queries/impor
 import appEvents from '../../events/app';
 
 import renderUser from './user';
-import { setImportMode, loadMapsInview, pushTag } from '../../events/import';
+import { setImportMode, loadMapsInview, pushTag, loadFeaturesInPolygon } from '../../events/import';
 import { ModelData } from 'waend/lib';
 
 const logger = debug('waend:comp/import');
@@ -21,23 +21,29 @@ export type UserFileImportState =
     | 'fileValidated';
 
 
+
+
 export interface ImportState {
+    originalMapId: string | null;
     mode: ImportMode;
     pendingFeatures: Feature[];
     userImport: UserFileImportState;
     coordinates: Position[];
     mapsInViewPort: any[];
     selectedTags: string[];
+    selectedFeatures: string[];
 }
 
 export const defaultImportState =
     (): ImportState => ({
+        originalMapId: null,
         mode: 'server',
         pendingFeatures: [],
         userImport: 'fileValidated',
         coordinates: [],
         mapsInViewPort: [],
         selectedTags: [],
+        selectedFeatures: [],
     });
 
 const renderTag =
@@ -52,7 +58,7 @@ const renderItem =
         const props = m.properties;
         const name = 'name' in props ? props.name : m.id;
         const tags = 'tags' in props ? props.tags : [];
-        logger(`${m.id} ${name} ${tags}`)
+        // logger(`${m.id} ${name} ${tags}`)
         return (
             DIV({ key: m.id },
                 SPAN({
@@ -67,6 +73,11 @@ const renderItem =
 const listMapsInView =
     () => getMapsInView().map(renderItem);
 
+const importSelection =
+    () => BUTTON({
+        onClick: () => loadFeaturesInPolygon(),
+    }, 'Import Selection');
+
 const render =
     () => {
         const nodes: React.ReactNode[] = [];
@@ -75,11 +86,11 @@ const render =
                 nodes.push(renderUser());
                 break;
             case 'server':
+                nodes.push(importSelection());
                 nodes.push(getTagsInView().map(renderTag));
                 nodes.push(listMapsInView());
                 break;
         }
-        logger(nodes);
         return DIV({},
             BUTTON({
                 onClick: () => {

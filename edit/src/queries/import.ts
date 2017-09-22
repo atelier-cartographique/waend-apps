@@ -5,9 +5,12 @@ import { ImportMode } from '../components/import';
 import { fromPredicate } from 'fp-ts/lib/Option';
 import * as uuid from 'uuid';
 import { ModelData } from 'waend/lib';
+import { DirectGeometryObject } from '../source/io/geojson';
 
 const logger = debug('waend:queries/import');
 
+export const getOriginalMapId =
+    () => query('component/import').originalMapId;
 
 export const getPendingFeatures =
     () => query('component/import').pendingFeatures;
@@ -40,6 +43,12 @@ const mkLineFeature =
             type: 'LineString',
             coordinates: closeCoordinates(),
         },
+    });
+
+export const mkPolygonGeometry =
+    (): DirectGeometryObject => ({
+        type: 'Polygon',
+        coordinates: [closeCoordinates()],
     });
 
 export const getImportGroup =

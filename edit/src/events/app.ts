@@ -13,7 +13,7 @@ import { Properties, DirectGeometryObject } from '../source/io/geojson';
 import appQueries from '../queries/app';
 import { resetSelection } from './select';
 import { resetLine, resetPolygon } from './trace';
-import { resetImport } from './import';
+import { resetImport, revertMap } from './import';
 
 
 const logger = debug('waend:events/app');
@@ -37,7 +37,12 @@ const idid =
 const events = {
 
     setMode(m: AppMode) {
-        dispatch('app/mode', () => m);
+        dispatch('app/mode', (cm) => {
+            if ('import' === cm) {
+                revertMap();
+            }
+            return m;
+        });
         switch (m) {
             case 'select':
                 resetSelection();
@@ -83,14 +88,16 @@ const events = {
         const parse =
             (data: any) => data;
 
-        getconfig('apiUrl')
-            .then(apiUrl => fetchGroup(apiUrl)(uid, gid, parse))
-            .then(data => dispatch('data/map', () => data.group))
-            .then(() => dispatch('app/mapId', () => gid))
-            .then(() => dispatch('app/layerIndex', () => 0))
-            .then(zoomToMapExtent)
-            .then(markDirty)
-            .catch(err => logger(`Failed loading ${err}`));
+        return (
+            getconfig('apiUrl')
+                .then(apiUrl => fetchGroup(apiUrl)(uid, gid, parse))
+                .then(data => dispatch('data/map', () => data.group))
+                .then(() => dispatch('app/mapId', () => gid))
+                .then(() => dispatch('app/layerIndex', () => 0))
+                .then(zoomToMapExtent)
+                .then(markDirty)
+                .then(() => logger(`loadMap ${gid} LOADED`))
+                .catch(err => logger(`Failed loading ${err}`)));
     },
 
     createMap() {
