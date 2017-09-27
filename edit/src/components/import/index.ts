@@ -2,10 +2,9 @@ import * as debug from 'debug';
 import { DIV, SPAN, BUTTON } from '../elements';
 import { Feature, Position } from '../../source/io/geojson';
 import { getImportMode, getMapsInView, getTagsInView } from '../../queries/import';
-import appEvents from '../../events/app';
 
 import renderUser from './user';
-import { setImportMode, loadMapsInview, pushTag, loadFeaturesInPolygon } from '../../events/import';
+import { setImportMode, loadMapsInview, pushTag, loadFeaturesInPolygon, showMap } from '../../events/import';
 import { ModelData } from 'waend/lib';
 
 const logger = debug('waend:comp/import');
@@ -24,7 +23,7 @@ export type UserFileImportState =
 
 
 export interface ImportState {
-    originalMapId: string | null;
+    importMap: any | null;
     mode: ImportMode;
     pendingFeatures: Feature[];
     userImport: UserFileImportState;
@@ -36,7 +35,7 @@ export interface ImportState {
 
 export const defaultImportState =
     (): ImportState => ({
-        originalMapId: null,
+        importMap: null,
         mode: 'server',
         pendingFeatures: [],
         userImport: 'fileValidated',
@@ -63,7 +62,7 @@ const renderItem =
             DIV({ key: m.id },
                 SPAN({
                     className: 'map-name',
-                    onClick: () => appEvents.loadMap(m.user_id, m.id),
+                    onClick: () => showMap(m.user_id, m.id),
                 }, name),
                 tags.map(renderTag),
             )

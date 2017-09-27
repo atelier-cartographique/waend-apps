@@ -19,7 +19,7 @@ import { resetImport, revertMap } from './import';
 const logger = debug('waend:events/app');
 const transport = new Transport();
 
-const fetchGroup =
+export const fetchGroup =
     (apiUrl: string) =>
         (uid: string, gid: string, parse: (a: any) => any) => {
             return (

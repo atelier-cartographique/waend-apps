@@ -2,7 +2,7 @@
 import * as debug from 'debug';
 import { dispatch, observe } from './index';
 import appQueries from '../queries/app';
-import appEvents from './app';
+import appEvents, { fetchGroup } from './app';
 import * as Promise from 'bluebird';
 import * as io from 'io-ts';
 import {
@@ -15,11 +15,12 @@ import {
 import { UserFileImportState, ImportMode, defaultImportState } from '../components/import';
 import { getBinder, Transport } from 'waend/shell';
 import { isDirectGeometry, ModelData, getconfig, Extent } from 'waend/lib';
-import { getPendingFeatures, mkPolygonGeometry, getOriginalMapId } from '../queries/import';
+import { getPendingFeatures, mkPolygonGeometry, getImportDataOption } from '../queries/import';
 import { tail } from 'fp-ts/lib/Array';
-import { zoomToMapExtent, markOverlayDirty } from './map';
+import { zoomToMapExtent, markOverlayDirty, markDirty } from './map';
 import { getGeoExtent } from 'waend/map/queries';
-import { getState, getFeatureById } from '../queries/map';
+import { getState } from '../queries/map';
+import { none, some, Option } from 'fp-ts/lib/Option';
 
 const logger = debug('waend:events/import');
 const transport = new Transport();
@@ -33,26 +34,29 @@ export const resetImport =
         })),
     );
 
+// export const revertMap =
+//     () => new Promise((resolve, reject) => {
+//         const oid = getOriginalMapId();
+//         if (oid) {
+//             appQueries.getMapId()
+//                 .fold(
+//                 () => reject(new Error('ImportedWasNull')),
+//                 (mid) => {
+//                     if (mid !== oid) {
+//                         appQueries.getUserId()
+//                             .fold(
+//                             () => reject(new Error('UserIdWasNull')),
+//                             uid => resolve(appEvents.loadMap(uid, oid)));
+//                     }
+//                 });
+//         }
+//         else {
+//             reject(new Error('OriginalWasNull'));
+//         }
+//     });
+
 export const revertMap =
-    () => new Promise((resolve, reject) => {
-        const oid = getOriginalMapId();
-        if (oid) {
-            appQueries.getMapId()
-                .fold(
-                () => reject(new Error('ImportedWasNull')),
-                (mid) => {
-                    if (mid !== oid) {
-                        appQueries.getUserId()
-                            .fold(
-                            () => reject(new Error('UserIdWasNull')),
-                            uid => resolve(appEvents.loadMap(uid, oid)));
-                    }
-                });
-        }
-        else {
-            reject(new Error('OriginalWasNull'));
-        }
-    });
+    () => dispatch('component/import', s => ({ ...s, importMap: null }));
 
 export const setImportMode =
     (mode: ImportMode) => dispatch('component/import', s => ({ ...s, mode }));
@@ -111,6 +115,22 @@ export const loadMapsInview =
 
 observe('component/map', loadMapsInview);
 
+
+export const showMap =
+    (uid: string, gid: string) => {
+        const parse =
+            (data: any) => data;
+
+        return (
+            getconfig('apiUrl')
+                .then(apiUrl => fetchGroup(apiUrl)(uid, gid, parse))
+                .then(data => dispatch('component/import', i => ({ ...i, importMap: data.group })))
+                .then(markDirty)
+                .then(() => logger(`loadImportMap ${gid} LOADED`))
+                .catch(err => logger(`Failed loading ${err}`)));
+    };
+
+
 const filterNotNull =
     <T>(a: (T | null)[]): T[] => {
         const r: T[] = [];
@@ -141,27 +161,58 @@ const importFeaturesList =
                         );
                     })
                         .then(() => addFeaturesToMap(fs))
-                        .then(zoomToMapExtent)
                         .then(() => appEvents.setMode('select'))
                         .then(() => logger(`END IMPORT`, fs))
                         .catch(err => logger(`err ${err}`));
                 });
         }
+    };
+
+const getFeatureInLayer =
+    (fid: string) =>
+        (l: any) => {
+            const fs: any[] = l.features;
+            return fs.find(f => f.id === fid);
+        }
+
+const getFeatureInLayers =
+    (fid: string, ls: any[]) => {
+        const find = getFeatureInLayer(fid);
+        const found = ls.reduce<Option<any>>((acc, l) => {
+            if (acc.isNone()) {
+                const r = find(l);
+                if (r) {
+                    return some(r)
+                }
+            }
+            return acc;
+        }, none);
+        logger(`found`, found)
+        return found.fold(
+            () => { logger(`fid not found ${fid}`); return null; },
+            f => f,
+        );
     }
+
+const getFeatureById =
+    (id: string) =>
+        getImportDataOption()
+            .map(g => getFeatureInLayers(id, g.layers as any[]));
+
 
 export const loadFeaturesInPolygon =
     () => {
         if (appQueries.getMode() === 'import') {
-            appQueries.getMapId()
-                .map(mid =>
-                    intersectsFeatures(mid, mkPolygonGeometry())
+            getImportDataOption()
+                .map(m =>
+                    intersectsFeatures(m.id, mkPolygonGeometry())
                         .then((fids) => {
                             const pendings = filterNotNull(
                                 fids.map((id: string) =>
                                     getFeatureById(id)
                                         .getOrElse(() => null)));
-                            revertMap()
-                                .then(() => importFeaturesList(pendings));
+                            logger(`pendings`, fids, pendings);
+                            importFeaturesList(pendings);
 
                         })
                         .catch(err => logger(`loadFeaturesInPolygon err ${err}`)),

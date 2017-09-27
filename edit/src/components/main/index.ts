@@ -1,4 +1,4 @@
-import { DIV, H1, A, INPUT } from '../elements';
+import { DIV, H1, A } from '../elements';
 import events from '../../events/app';
 import queries from '../../queries/app';
 // import { getMapName } from '../../queries/map';

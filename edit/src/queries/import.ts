@@ -2,15 +2,21 @@ import * as debug from 'debug';
 import { query } from './index';
 import { overlayData } from '../components/map/overlay';
 import { ImportMode } from '../components/import';
-import { fromPredicate } from 'fp-ts/lib/Option';
+import { fromPredicate, fromNullable } from 'fp-ts/lib/Option';
 import * as uuid from 'uuid';
 import { ModelData } from 'waend/lib';
 import { DirectGeometryObject } from '../source/io/geojson';
 
 const logger = debug('waend:queries/import');
 
-export const getOriginalMapId =
-    () => query('component/import').originalMapId;
+export const getImportDataOption =
+    () => fromNullable(query('component/import').importMap);
+
+export const getImportData =
+    () => getImportDataOption().fold(
+        () => ({}),
+        g => g
+    );
 
 export const getPendingFeatures =
     () => query('component/import').pendingFeatures;
